@@ -235,7 +235,7 @@
         <aside class="sidebar">
             <div class="space-y-6">
                 <div class="flex items-center space-x-3 cursor-pointer" onclick="app.navigateTo('dashboard')">
-                    <div id="sidebar-logo-box" style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #0ea5e9); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px;">S</div>
+                    <div id="sidebar-logo-box" style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #0ea5e9); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px;">₹</div>
                     <div>
                         <h2 id="brand-name-text" style="font-size: 18px; font-weight: 800;">ShareSpend</h2>
                         <p id="brand-sub-text" style="font-size: 11px; color: var(--text-sub);">Split Expenses</p>
@@ -656,7 +656,7 @@
 
     <!-- JAVASCRIPT APPLICATION LOGIC ENGINE -->
     <script>
-        const STORAGE_KEY = 'sharespend_pro_v22';
+        const STORAGE_KEY = 'sharespend_pro_v23';
 
         const QUIZ_QUESTIONS = [
             {
@@ -730,10 +730,8 @@
                 document.getElementById('brand-name-text').innerText = APP_CONFIG.appName;
                 document.getElementById('brand-sub-text').innerText = APP_CONFIG.appSubTitle;
                 
-                // Using Logo configurations preserving user's specific request
                 const logoBox = document.getElementById('sidebar-logo-box');
                 if(APP_CONFIG.logoType === 'image' && APP_CONFIG.logoImageURL) {
-                    // Fallback to text if image fails to load to keep UI clean
                     logoBox.innerHTML = `<img src="${APP_CONFIG.logoImageURL}" onerror="this.outerHTML='${APP_CONFIG.logoContent}'" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
                 } else {
                     logoBox.innerText = APP_CONFIG.logoContent;
@@ -1345,7 +1343,7 @@
                 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
                 if (SpeechRecognition) {
                     this.recognition = new SpeechRecognition();
-                    this.recognition.continuous = false; // Manually restarted for stability
+                    this.recognition.continuous = false; 
                     
                     this.recognition.onstart = () => {
                         document.getElementById('mic-status-btn').classList.add('pulse-mic');
@@ -1353,12 +1351,11 @@
                     };
 
                     this.recognition.onerror = (event) => {
-                        // Prevent infinite permission loops if running on HTTP or if user denies
                         if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
                             this.isContinuousListening = false;
                             document.getElementById('mic-status-btn').classList.remove('pulse-mic');
                             document.getElementById('voice-status-text').innerText = TRANSLATIONS[this.state.lang || 'mr'].speakMic;
-                            alert(this.state.lang === 'mr' ? 'मायक्रोफोनला परवानगी दिलेली नाही. कृपया ब्राउझर सेटिंग्ज तपासा. (टीप: माईक फीचरसाठी ॲप HTTPS किंवा GitHub वर रन होणे आवश्यक आहे.)' : 'Microphone access denied. Please allow it in browser settings. (Note: Mic requires HTTPS like GitHub pages)');
+                            alert(this.state.lang === 'mr' ? 'मायक्रोफोनला परवानगी दिलेली नाही. कृपया ब्राउझर सेटिंग्ज तपासा.' : 'Microphone access denied. Please allow it in browser settings.');
                         }
                     };
 
@@ -1368,13 +1365,12 @@
                     };
 
                     this.recognition.onend = () => {
-                        // Safely restart only if we are still supposed to be listening and AI is not speaking
                         if (this.isContinuousListening && !this.isSpeaking) {
                             setTimeout(() => {
                                 if (this.isContinuousListening && !this.isSpeaking) {
                                     try { this.recognition.start(); } catch(e) {}
                                 }
-                            }, 800); // 800ms delay to prevent aggressive looping and crash
+                            }, 800); 
                         } else if (!this.isContinuousListening) {
                             document.getElementById('mic-status-btn').classList.remove('pulse-mic');
                             document.getElementById('voice-status-text').innerText = TRANSLATIONS[this.state.lang || 'mr'].speakMic;
@@ -1465,12 +1461,10 @@
 
                 // --- AI Logic Branching ---
 
-                // A: User Question (Who paid how much?)
                 if (matchedUser) {
                     const userPaid = this.state.expenses.filter(e => e.paidBy === matchedUser.id).reduce((s, e) => s + Number(e.amount), 0);
                     responseText = isMr ? `${matchedUser.name} ने आतापर्यंत ${this.formatMoney(userPaid)} रुपये दिले आहेत.` : `${matchedUser.name} has paid ${this.formatMoney(userPaid)} so far.`;
                 }
-                // B: Category Question
                 else if (matchedCategory) {
                     const catExpenses = this.state.expenses.filter(e => e.category === matchedCategory);
                     const total = catExpenses.reduce((s, e) => s + e.amount, 0);
@@ -1481,9 +1475,8 @@
                         responseText = isMr ? `तुम्ही ${catNameMr} अजून काहीही खर्च केलेला नाही.` : `You haven't spent anything on ${matchedCategory} yet.`;
                     }
                 }
-                // C: Trip / Group Summary
                 else if (matchedGroup || lowerTxt.match(/summarize|summary|सारांश|माहिती|ट्रिप/)) {
-                    const targetGroup = matchedGroup || this.state.groups[this.state.groups.length - 1]; // Use matched or most recent
+                    const targetGroup = matchedGroup || this.state.groups[this.state.groups.length - 1]; 
                     if (!targetGroup) {
                         responseText = isMr ? "कोणतीही ट्रिप उपलब्ध नाही." : "No trips available to summarize.";
                     } else {
@@ -1492,7 +1485,6 @@
                         responseText = isMr ? `${targetGroup.name} मध्ये आतापर्यंत एकूण ${this.formatMoney(grpTotal)} खर्च झाला आहे. त्यात ${grpExp.length} नोंदी आहेत.` : `The total spend for ${targetGroup.name} is ${this.formatMoney(grpTotal)} across ${grpExp.length} expenses.`;
                     }
                 }
-                // D: Owe/Debts Question
                 else if (lowerTxt.match(/owes|owe|बाकी|देणे|येणे|उधार|कर्ज|द्यायचे|घ्यायचे|कोणाचे|कोणाला/)) {
                     const bal = this.calculateBalances();
                     const txs = this.simplifyDebts(bal);
@@ -1508,12 +1500,10 @@
                         else responseText = isMr ? `तुमच्याकडे येणे रक्कम: ${owedList.map(t => `${this.getUser(t.from).name} कडून ${this.formatMoney(t.amount)}`).join(', ')}` : `Here is who owes you: ${owedList.map(t => `${this.getUser(t.from).name} owes ${this.formatMoney(t.amount)}`).join(', ')}.`;
                     }
                 }
-                // E: General Total Spend
                 else if (lowerTxt.match(/spend|total|खर्च|एकूण|बिल/)) {
                     const total = this.state.expenses.reduce((s, e) => s + Number(e.amount), 0);
                     responseText = isMr ? `तुमचा आजपर्यंतचा एकूण नोंदवलेला खर्च ${this.formatMoney(total)} इतका आहे.` : `Your total recorded spending is ${this.formatMoney(total)}.`;
                 }
-                // F: SMART FALLBACK (If keyword fails, summarize the dashboard)
                 else {
                     const total = this.state.expenses.reduce((s, e) => s + Number(e.amount), 0);
                     const bal = this.calculateBalances();
@@ -1522,8 +1512,8 @@
                     let owedTotal = owedList.reduce((s, t) => s + t.amount, 0);
 
                     responseText = isMr 
-                        ? `मला तुमचा प्रश्न नक्की समजला नाही. पण माहितीसाठी, तुमचा एकूण खर्च ${this.formatMoney(total)} आहे आणि तुमच्याकडे ${this.formatMoney(owedTotal)} येणे बाकी आहे.` 
-                        : `I didn't get the exact question. But for info, your total spend is ${this.formatMoney(total)} and you are owed ${this.formatMoney(owedTotal)}.`;
+                        ? `तुम्ही म्हणालात "${txt}". मला नक्की प्रश्न समजला नाही. पण माहितीसाठी, तुमचा एकूण खर्च ${this.formatMoney(total)} आहे आणि येणे रक्कम ${this.formatMoney(owedTotal)} आहे.` 
+                        : `You said "${txt}". I didn't get the question. But your total spend is ${this.formatMoney(total)} and owed amount is ${this.formatMoney(owedTotal)}.`;
                 }
 
                 document.getElementById('assistant-response').innerText = responseText;
@@ -1531,7 +1521,6 @@
             }
 
             speakAssistantResponse(text) {
-                // VERY IMPORTANT: Stop listening so the AI doesn't hear itself speaking!
                 this.isSpeaking = true;
                 if (this.isContinuousListening) {
                     try { this.recognition.stop(); } catch(e) {}
@@ -1559,11 +1548,9 @@
                             selectedVoice = this.availableVoices.find(v => v.voiceURI === settings.voiceURI);
                         }
 
-                        // NEW STRICT GENDER & LANGUAGE ALGORITHM
                         if (!selectedVoice) {
                             let possibleVoices = this.availableVoices;
                             
-                            // 1. STRICT LANGUAGE FILTER: Only allow 'mr' (Marathi) or 'hi' (Hindi)
                             if (isMarathi) {
                                 possibleVoices = this.availableVoices.filter(v => 
                                     v.lang.toLowerCase().includes('mr') || 
@@ -1573,14 +1560,12 @@
                                 possibleVoices = this.availableVoices.filter(v => v.lang.toLowerCase().includes('en'));
                             }
 
-                            // 2. GENDER FILTER
                             selectedVoice = possibleVoices.find(v => {
                                 const vName = v.name.toLowerCase();
                                 return isMale ? (vName.includes('male') || vName.includes('david') || vName.includes('rishi') || vName.includes('madhav') || vName.includes('hemant'))
                                               : (vName.includes('female') || vName.includes('zira') || vName.includes('samantha') || vName.includes('shruti') || vName.includes('aditi') || vName.includes('kalpana') || vName.includes('lekha'));
                             });
 
-                            // 3. FALLBACK: Better to have wrong gender than wrong language!
                             if (!selectedVoice && possibleVoices.length > 0) {
                                 selectedVoice = possibleVoices[0]; 
                             }
@@ -1589,7 +1574,6 @@
                         if (selectedVoice) utterance.voice = selectedVoice;
                     }
 
-                    // Resume listening AFTER the speech completely finishes
                     utterance.onend = () => {
                         this.isSpeaking = false;
                         if (this.isContinuousListening && document.getElementById('view-assistant').classList.contains('hidden') === false) {
