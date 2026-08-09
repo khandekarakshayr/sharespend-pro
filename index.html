@@ -1,1711 +1,946 @@
 <!DOCTYPE html>
 <html lang="mr" class="light">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title id="html-title">ShareSpend Pro — Smart Expense Splitter & AI Voice Assistant</title>
-    <style>
-        /* 100% STANDALONE EMBEDDED CSS ENGINE - ZERO EXTERNAL DEPENDENCIES */
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
-        
-        :root {
-            --bg-main: #f8fafc;
-            --bg-card: #ffffff;
-            --bg-sub: #f1f5f9;
-            --text-main: #0f172a;
-            --text-sub: #64748b;
-            --border-color: #e2e8f0;
-            --primary: #10b981;
-            --primary-hover: #059669;
-            --danger: #ef4444;
-            --accent: #6366f1;
-            --card-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.08);
-        }
-
-        .dark {
-            --bg-main: #0f172a;
-            --bg-card: #1e293b;
-            --bg-sub: #0f172a;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
-            --border-color: #334155;
-            --card-shadow: 0 10px 20px -3px rgba(0, 0, 0, 0.4);
-        }
-
-        body { background-color: var(--bg-main); color: var(--text-main); min-height: 100vh; display: flex; flex-direction: column; }
-        .hidden { display: none !important; }
-        .flex { display: flex; }
-        .flex-col { flex-direction: column; }
-        .items-center { align-items: center; }
-        .justify-between { justify-content: space-between; }
-        .space-x-2 > * + * { margin-left: 8px; }
-        .space-y-3 > * + * { margin-top: 12px; }
-        .space-y-4 > * + * { margin-top: 16px; }
-        .space-y-6 > * + * { margin-top: 24px; }
-        .grid { display: grid; }
-        .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-        .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .gap-4 { gap: 16px; }
-        .gap-3 { gap: 12px; }
-        .w-full { width: 100%; }
-
-        .sidebar { width: 260px; background: var(--bg-card); border-right: 1px solid var(--border-color); padding: 20px; display: flex; flex-direction: column; justify-content: space-between; position: sticky; top: 0; height: 100vh; shrink: 0; }
-        .main-wrapper { flex: 1; display: flex; flex-direction: column; min-height: 100vh; min-width: 0; }
-        header { background: var(--bg-card); border-bottom: 1px solid var(--border-color); padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
-        main { flex: 1; padding: 24px; max-width: 1100px; margin: 0 auto; width: 100%; }
-
-        .card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; box-shadow: var(--card-shadow); transition: transform 0.2s; }
-        .card:hover { transform: translateY(-2px); }
-        .banner { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); color: #ffffff; border-radius: 20px; padding: 24px; display: flex; justify-content: space-between; align-items: center; }
-
-        .btn { padding: 10px 18px; border-radius: 12px; font-weight: 600; font-size: 13px; border: none; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; justify-content: center; gap: 8px; user-select: none; }
-        .btn:active { transform: scale(0.97); }
-        .btn-primary { background: var(--primary); color: #ffffff; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); }
-        .btn-primary:hover { background: var(--primary-hover); }
-        .btn-secondary { background: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color); }
-        .btn-secondary:hover { opacity: 0.9; }
-        .btn-accent { background: var(--accent); color: white; }
-        .btn-danger { background: #fee2e2; color: var(--danger); border: 1px solid #fca5a5; }
-        .btn-danger:hover { background: #fca5a5; }
-
-        input, select, textarea { width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-sub); color: var(--text-main); font-size: 13px; outline: none; }
-        input:focus, select:focus, textarea:focus { border-color: var(--primary); }
-
-        .nav-btn { width: 100%; padding: 12px 16px; border-radius: 12px; background: transparent; border: none; color: var(--text-sub); font-weight: 600; font-size: 14px; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 12px; transition: 0.2s; }
-        .nav-btn:hover, .nav-btn.active { background: rgba(16, 185, 129, 0.12); color: var(--primary); }
-
-        .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px; }
-        .modal-content { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 20px; width: 100%; max-width: 750px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; }
-
-        .mobile-nav { display: none; }
-        @media (max-width: 768px) {
-            .sidebar { display: none; }
-            .mobile-nav { display: flex; position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-card); border-top: 1px solid var(--border-color); padding: 8px 16px; justify-content: space-around; z-index: 100; }
-            .mobile-nav-btn { display: flex; flex-direction: column; align-items: center; font-size: 10px; color: var(--text-sub); border: none; background: none; cursor: pointer; }
-            .grid-cols-3, .grid-cols-2 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-            .banner { flex-direction: column; align-items: flex-start; gap: 16px; }
-        }
-
-        .toast { position: fixed; top: 20px; right: 20px; background: #0f172a; color: #ffffff; padding: 12px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); z-index: 2000; }
-        .pulse-mic { animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1.05); box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
-        
-        .badge { padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 700; text-transform: uppercase; }
-        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 6px; }
-        .checkbox-label { display: flex; align-items: center; gap: 6px; font-size: 12px; background: var(--bg-sub); padding: 6px 12px; border-radius: 8px; cursor: pointer; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
-        th, td { border: 1px solid var(--border-color); padding: 8px; text-align: left; vertical-align: middle; }
-        th { background: var(--bg-sub); font-weight: 700; }
-        .table-responsive { width: 100%; overflow-x: auto; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>ShareSpend Pro — Smart Expense Splitter</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+:root{--bg-main:#f8fafc;--bg-card:#ffffff;--bg-sub:#f1f5f9;--text-main:#0f172a;--text-sub:#64748b;--border-color:#e2e8f0;--primary:#10b981;--primary-hover:#059669;--danger:#ef4444;--accent:#6366f1;--card-shadow:0 4px 12px -2px rgba(15,23,42,0.08)}
+.dark{--bg-main:#0f172a;--bg-card:#1e293b;--bg-sub:#0f172a;--text-main:#f8fafc;--text-sub:#94a3b8;--border-color:#334155;--card-shadow:0 10px 20px -3px rgba(0,0,0,0.4)}
+body{background:var(--bg-main);color:var(--text-main);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+.hidden{display:none!important}.flex{display:flex}.items-center{align-items:center}.justify-between{justify-content:space-between}
+.space-x-2>*+*{margin-left:8px}.space-y-2>*+*{margin-top:8px}.space-y-3>*+*{margin-top:12px}.space-y-4>*+*{margin-top:16px}.space-y-6>*+*{margin-top:24px}
+.grid{display:grid}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.gap-4{gap:16px}.gap-3{gap:12px}.w-full{width:100%}
+.sidebar{width:260px;background:var(--bg-card);border-right:1px solid var(--border-color);padding:20px;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;flex-shrink:0}
+.main-wrapper{flex:1;display:flex;flex-direction:column;min-height:100vh;min-width:0}
+header{background:var(--bg-card);border-bottom:1px solid var(--border-color);padding:16px 24px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;flex-wrap:wrap;gap:10px}
+main{flex:1;padding:24px;max-width:1100px;margin:0 auto;width:100%}
+.card{background:var(--bg-card);border:1px solid var(--border-color);border-radius:16px;padding:20px;box-shadow:var(--card-shadow);transition:transform .2s}
+.card:hover{transform:translateY(-2px)}
+.banner{background:linear-gradient(135deg,#0f172a 0%,#1e1b4b 100%);color:#fff;border-radius:20px;padding:24px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.btn{padding:10px 18px;border-radius:12px;font-weight:600;font-size:13px;border:none;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;justify-content:center;gap:8px;user-select:none}
+.btn:active{transform:scale(.97)}.btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(16,185,129,.25)}.btn-primary:hover{background:var(--primary-hover)}
+.btn-secondary{background:var(--bg-sub);color:var(--text-main);border:1px solid var(--border-color)}.btn-secondary:hover{opacity:.9}
+.btn-danger{background:#fee2e2;color:var(--danger);border:1px solid #fca5a5}.btn-danger:hover{background:#fca5a5}
+input,select,textarea{width:100%;padding:10px 14px;border-radius:10px;border:1px solid var(--border-color);background:var(--bg-sub);color:var(--text-main);font-size:13px;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--primary)}
+.nav-btn{width:100%;padding:12px 16px;border-radius:12px;background:transparent;border:none;color:var(--text-sub);font-weight:600;font-size:14px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:12px;transition:.2s;margin-bottom:8px}
+.nav-btn:hover,.nav-btn.active{background:rgba(16,185,129,.12);color:var(--primary)}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.65);backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;z-index:1000;padding:16px;overflow-y:auto}
+.modal-content{background:var(--bg-card);border:1px solid var(--border-color);border-radius:20px;width:100%;max-width:850px;padding:24px;box-shadow:0 20px 25px -5px rgba(0,0,0,.2);margin:auto}
+.fab-ai{position:fixed;bottom:24px;right:24px;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#a855f7);color:#fff;font-size:28px;border:none;box-shadow:0 4px 15px rgba(99,102,241,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:1000;transition:transform .2s}
+.fab-ai:hover{transform:scale(1.05)}.mobile-nav{display:none}
+.budget-bar{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;background:var(--bg-sub);padding:12px 16px;border-radius:12px;gap:10px;border:1px solid var(--border-color);margin-bottom:16px}
+.budget-stat{display:flex;flex-direction:column}.budget-label{font-size:11px;color:var(--text-sub);font-weight:700;text-transform:uppercase}.budget-val{font-size:16px;font-weight:800}
+.notes-area{width:100%;min-height:80px;font-size:13px;background:var(--bg-sub);padding:12px;border-radius:10px;border:1px solid var(--border-color);margin-bottom:16px;resize:vertical}
+@media(max-width:768px){.sidebar{display:none}.mobile-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--bg-card);border-top:1px solid var(--border-color);padding:8px 16px;justify-content:space-around;z-index:100}
+.mobile-nav-btn{display:flex;flex-direction:column;align-items:center;font-size:10px;color:var(--text-sub);border:none;background:none;cursor:pointer}
+.grid-cols-3,.grid-cols-2{grid-template-columns:1fr}main{padding:16px;padding-bottom:80px}header{flex-direction:column;align-items:flex-start}
+.header-actions{width:100%;justify-content:space-between;display:flex;margin-top:10px}.fab-ai{bottom:80px;right:16px;width:50px;height:50px;font-size:24px}}
+.toast{position:fixed;top:20px;right:20px;background:#0f172a;color:#fff;padding:12px 20px;border-radius:12px;font-size:13px;font-weight:600;box-shadow:0 10px 15px -3px rgba(0,0,0,.3);z-index:2000}
+.pulse-mic{animation:pulse 1.5s infinite}@keyframes pulse{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,.7)}70%{transform:scale(1.05);box-shadow:0 0 0 12px rgba(239,68,68,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,0)}}
+.badge{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;text-transform:uppercase}
+.checkbox-group{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}.checkbox-label{display:flex;align-items:center;gap:6px;font-size:12px;background:var(--bg-card);padding:6px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border-color)}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-width:600px}th,td{border:1px solid var(--border-color);padding:8px;text-align:left;vertical-align:middle}th{background:var(--bg-sub);font-weight:700}
+.table-responsive{width:100%;overflow-x:auto;border:1px solid var(--border-color);border-radius:8px;margin-bottom:16px}
+</style>
 </head>
 <body>
+<div id="app-container" class="flex w-full">
+<aside class="sidebar">
+<div class="space-y-6">
+<div class="flex items-center space-x-3 cursor-pointer" onclick="app.navigateTo('dashboard')">
+<div style="width:40px;height:40px;border-radius:12px;overflow:hidden;flex-shrink:0;border:1px solid var(--border-color);background:#fff;">
+<img src="logo.jpg" alt="ShareSpend Logo" style="width:100%;height:100%;object-fit:cover;">
+</div>
+<div><h2 style="font-size:18px;font-weight:800">ShareSpend</h2><p style="font-size:11px;color:var(--text-sub)">Pro Edition</p></div>
+</div>
+<button class="btn btn-primary w-full" onclick="app.openExpenseModal()" data-t="addExpense">+ Add Expense</button>
+<nav>
+<button class="nav-btn active" id="nav-dashboard" onclick="app.navigateTo('dashboard')">📊 <span data-t="dashboard">Dashboard</span></button>
+<button class="nav-btn" id="nav-groups" onclick="app.navigateTo('groups')">👥 <span data-t="groups">Groups / Trips</span></button>
+<button class="nav-btn" id="nav-expenses" onclick="app.navigateTo('expenses')">📜 <span data-t="expenses">Expense History</span></button>
+<button class="nav-btn" id="nav-members" onclick="app.navigateTo('members')">👤 <span data-t="members">Manage Members</span></button>
+<button class="nav-btn" id="nav-assistant" onclick="app.navigateTo('assistant')">🎙️ <span data-t="assistant">AI Voice Assistant</span></button>
+<button class="nav-btn" id="nav-quiz" onclick="app.navigateTo('quiz')">💡 <span data-t="quiz">Dynamic Quiz</span></button>
+<button class="nav-btn" id="nav-bin" onclick="app.navigateTo('bin')">🗑️ <span data-t="bin">Recycle Bin</span></button>
+<button class="nav-btn" id="nav-settings" onclick="app.navigateTo('settings')">⚙️ <span data-t="settings">Settings & Profile</span></button>
+</nav>
+</div>
+<div style="padding-top:16px;border-top:1px solid var(--border-color);margin-top:auto">
+<div style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:8px;border-radius:12px" onclick="app.navigateTo('settings')">
+<div id="sidebar-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px">ME</div>
+<div style="min-width:0"><p id="sidebar-name" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0">Your Name</p>
+<p id="sidebar-email" style="font-size:11px;color:var(--text-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0">admin@sharespend.app</p></div>
+</div></div>
+</aside>
 
-    <script>
-        const APP_CONFIG = {
-            appName: "ShareSpend Pro",
-            appSubTitle: "Expense Splitter & AI Voice",
-            logoType: "text",
-            logoContent: "₹",
-            logoImageURL: "logo.jpg"
-        };
+<div class="main-wrapper">
+<header>
+<h1 id="page-title" style="font-size:18px;font-weight:700">Dashboard</h1>
+<div class="flex items-center space-x-3 header-actions">
+<select id="lang-select" onchange="app.changeLanguage(this.value)" style="width:auto;padding:6px;font-weight:700;border-radius:8px">
+<option value="mr">🌐 मराठी</option><option value="en">🌐 English</option>
+</select>
+<select id="currency-select" onchange="app.changeCurrency(this.value)" style="width:auto;padding:6px;border-radius:8px;font-weight:600">
+<option value="INR">₹ INR</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option><option value="GBP">£ GBP</option>
+</select>
+<button class="btn btn-secondary" onclick="app.toggleDarkMode()">🌙</button>
+</div>
+</header>
 
-        const TRANSLATIONS = {
-            en: {
-                dashboard: "Dashboard",
-                groups: "Groups / Trips",
-                expenses: "Expense History",
-                members: "Manage Members",
-                assistant: "AI Voice Assistant",
-                quiz: "Financial Quiz",
-                settings: "Settings & Profile",
-                addExpense: "+ Add Expense",
-                newGroup: "+ New Group",
-                addMemberBtn: "+ Add Member",
-                settleUp: "🤝 1-Click Settle Up",
-                youOwe: "You Owe",
-                youAreOwed: "You Are Owed",
-                totalSpend: "Total Spending",
-                tripSummaries: "🏕️ Click Any Trip Below to Open & Edit Manual Sheet",
-                simplifiedDebts: "⚡ Simplified Repayments (Auto-Optimized)",
-                recentExpenses: "Recent Expenses",
-                welcome: "Welcome",
-                overview: "Master Overview",
-                overviewSub: "Master summary across all trips and active group ledgers.",
-                speakMic: "Listening... (Speak Now)",
-                transcript: "VOICE TRANSCRIPT",
-                response: "AI RESPONSE & AUDIO",
-                whoOwesMe: "❓ Who owes me?",
-                foodSpendBtn: "🍔 Food expenses?",
-                summarizeTrip: "🏖️ Summarize trip",
-                saveProfile: "Save Profile",
-                exportData: "📥 Master CSV Export",
-                uploadCSV: "📤 Import CSV Sheet",
-                resetData: "🗑️ Clear All Data",
-                payableBalance: "Payable balance",
-                receivableBalance: "Receivable balance",
-                acrossExpenses: "Across all active expenses",
-                selectGroup: "Select Group / Trip",
-                paidBy: "Paid By",
-                descPlaceholder: "Description (e.g. Flight, Dinner)",
-                amtPlaceholder: "Amount",
-                categoryLabel: "Category",
-                dateLabel: "Date",
-                cancel: "Cancel",
-                saveExpenseBtn: "Save Expense",
-                saveGroupBtn: "Create Group",
-                createGrpTitle: "Create Group / Trip",
-                editGrpTitle: "Edit Group / Trip",
-                grpNamePlaceholder: "Group/Trip Name (e.g. Goa Trip 2026)",
-                grpTypeLabel: "Type",
-                settleTitle: "Record Settlement",
-                payerLabel: "Payer (Who Paid)",
-                payeeLabel: "Payee (Who Received)",
-                testAudioBtn: "🔊 Test Voice Output",
-                membersSub: "Add or manage unlimited friends and group members here.",
-                uploadReceipt: "📷 Upload Bill/Receipt Image",
-                targetBudget: "Target Budget",
-                groupSheetTitle: "Manual Trip Expense Sheet",
-                openSheet: "📊 Open Sub-Sheet"
-            },
-            mr: {
-                dashboard: "डॅशबोर्ड",
-                groups: "ग्रुप्स व ट्रिप्स",
-                expenses: "खर्चाचा इतिहास",
-                members: "सदस्य व्यवस्थापन",
-                assistant: "AI व्हॉईस असिस्टंट",
-                quiz: "फायनान्शियल क्विझ",
-                settings: "सेटिंग्ज आणि प्रोफाइल",
-                addExpense: "+ खर्च जोडा",
-                newGroup: "+ नवीन ग्रुप / ट्रिप",
-                addMemberBtn: "+ नवीन सदस्य जोडा",
-                settleUp: "🤝 १-क्लिक सेटल अप",
-                youOwe: "तुमची देणे रक्कम",
-                youAreOwed: "तुमची येणे रक्कम",
-                totalSpend: "एकूण खर्च",
-                tripSummaries: "🏕️ कोणत्याही ट्रिपवर क्लिक करून त्यांची मॅन्युअल सब-शीट उघडा",
-                simplifiedDebts: "⚡ सोपे केलेले व्यवहार (ऑटो-ऑप्टिमाइझ)",
-                recentExpenses: "अलीकडील खर्च",
-                welcome: "नमस्कार",
-                overview: "मास्टर हिशोब सारांश",
-                overviewSub: "सर्व ट्रिप्स व सक्रिय ग्रुप्सची एकत्रित आर्थिक स्थिती.",
-                speakMic: "ऐकत आहे... (आता बोला)",
-                transcript: "तुम्ही म्हणालात",
-                response: "AI असिस्टंटचे उत्तर",
-                whoOwesMe: "❓ कोणाकडे पैसे बाकी आहेत?",
-                foodSpendBtn: "🍔 जेवणावर किती खर्च झाला?",
-                summarizeTrip: "🏖️ ट्रिपचा सारांश सांग",
-                saveProfile: "प्रोफाइल सेव्ह करा",
-                exportData: "📥 मास्टर CSV डाऊनलोड",
-                uploadCSV: "📤 CSV शीट अपलोड करा",
-                resetData: "🗑️ सर्व डेटा रिसेट करा",
-                payableBalance: "देणे बाकी हिशोब",
-                receivableBalance: "येणे बाकी हिशोब",
-                acrossExpenses: "एकूण नोंदींनुसार",
-                selectGroup: "ग्रुप किंवा ट्रिप निवडा",
-                paidBy: "पैसे कोणी दिले",
-                descPlaceholder: "खर्चाचा तपशील (उदा. फ्लाईट तिकीट, हॉटेल)",
-                amtPlaceholder: "रक्कम",
-                categoryLabel: "प्रकार (Category)",
-                dateLabel: "दिनांक",
-                cancel: "रद्द करा",
-                saveExpenseBtn: "खर्च सेव्ह करा",
-                saveGroupBtn: "ग्रुप तयार करा",
-                createGrpTitle: "नवीन ग्रुप / ट्रिप तयार करा",
-                editGrpTitle: "ग्रुप संपादन करा (Edit Group)",
-                grpNamePlaceholder: "ग्रुपचे नाव (उदा. गोवा ट्रिप २०२६)",
-                grpTypeLabel: "प्रकार",
-                settleTitle: "देणी-घेणी पूर्ण नोंदवा (Settlement)",
-                payerLabel: "पैसे देणारा",
-                payeeLabel: "पैसे घेणारा",
-                testAudioBtn: "🔊 मराठी आवाजाची चाचणी घ्या",
-                membersSub: "इथे तुम्ही अमर्याद मित्रांची व सदस्यांची नावे जोडू किंवा व्यवस्थापित करू शकता.",
-                uploadReceipt: "📷 बिल / पावतीची इमेज अपलोड करा",
-                targetBudget: "अंदाजित बजेट",
-                groupSheetTitle: "ट्रिप खर्चाची सविस्तर सब-शीट (Sub-Sheet)",
-                openSheet: "📊 सब-शीट उघडा"
-            }
-        };
-    </script>
+<main>
+<section id="view-dashboard" class="space-y-6">
+<div class="banner">
+<div>
+<span style="font-size:11px;font-weight:700;color:#34d399;text-transform:uppercase" data-t="overview">Master Overview</span>
+<h2 style="font-size:22px;font-weight:800;margin-top:4px" id="dash-greeting">Welcome 👋</h2>
+<p style="font-size:13px;color:#cbd5e1;margin-top:4px" data-t="overviewSub">Summary across all active ledgers.</p>
+</div>
+<div class="space-x-2 flex"><button class="btn btn-primary" onclick="app.openSettleModal()" data-t="settleUp">🤝 Settle Up</button></div>
+</div>
+<div class="grid grid-cols-3 gap-4">
+<div class="card space-y-2"><span style="font-size:12px;color:var(--text-sub);font-weight:600" data-t="youOwe">You Owe</span><h3 style="font-size:24px;font-weight:800;color:var(--danger)" id="dash-owe">₹0.00</h3></div>
+<div class="card space-y-2"><span style="font-size:12px;color:var(--text-sub);font-weight:600" data-t="youAreOwed">You Are Owed</span><h3 style="font-size:24px;font-weight:800;color:var(--primary)" id="dash-owed">₹0.00</h3></div>
+<div class="card space-y-2"><span style="font-size:12px;color:var(--text-sub);font-weight:600" data-t="totalSpend">Total Spend</span><h3 style="font-size:24px;font-weight:800" id="dash-total">₹0.00</h3></div>
+</div>
+<div class="card space-y-4"><h3 style="font-size:16px;font-weight:700" data-t="tripSummaries">🏕️ Trips</h3><div id="dashboard-trips-overview" class="grid grid-cols-2 gap-4"></div></div>
+<div class="card space-y-4"><h3 style="font-size:16px;font-weight:700" data-t="simplifiedDebts">⚡ Repayments</h3><div id="debts-list" class="grid grid-cols-2 gap-3"></div></div>
+</section>
 
-    <!-- MAIN APP CONTAINER -->
-    <div id="app-container" class="flex w-full">
+<section id="view-groups" class="hidden space-y-6">
+<div class="flex justify-between items-center"><h2 data-t="groups">Groups / Trips</h2><button class="btn btn-primary" onclick="app.openGroupModal()" data-t="newGroup">+ New Group</button></div>
+<div id="groups-list" class="grid grid-cols-3 gap-4"></div>
+</section>
+
+<section id="view-expenses" class="hidden space-y-6">
+<div class="flex justify-between items-center"><h2 data-t="expenses">Ledger</h2><button class="btn btn-primary" onclick="app.openExpenseModal()" data-t="addExpense">+ Add Expense</button></div>
+<div id="all-expenses-list" class="space-y-3"></div>
+</section>
+
+<section id="view-members" class="hidden space-y-6">
+<div class="flex justify-between items-center"><h2 data-t="members">Members</h2><button class="btn btn-primary" onclick="app.openAddMemberModal()" data-t="addMemberBtn">+ Add Member</button></div>
+<div id="members-list" class="grid grid-cols-2 gap-4"></div>
+</section>
+
+<section id="view-bin" class="hidden space-y-6">
+<div class="flex justify-between items-center"><h2 data-t="bin">🗑️ Recycle Bin</h2><button class="btn btn-danger" onclick="app.emptyBin()">Empty Bin</button></div>
+<p style="font-size:13px;color:var(--text-sub)">Deleted items appear here.</p>
+<div class="card space-y-4"><h3>Deleted Groups</h3><div id="bin-groups-list" class="grid grid-cols-2 gap-4"></div></div>
+<div class="card space-y-4"><h3>Deleted Members</h3><div id="bin-members-list" class="grid grid-cols-2 gap-4"></div></div>
+</section>
+
+<section id="view-assistant" class="hidden space-y-6">
+<h2 data-t="assistant">🎙️ AI Voice Assistant</h2>
+<div class="card space-y-6 text-center" style="padding:32px;border:2px solid var(--primary)">
+<div class="flex justify-center items-center space-x-4 mb-2 flex-wrap gap-2">
+    <div>
+        <span style="font-size:12px;font-weight:700;color:var(--text-sub)" data-t="selectAgent">🤖 AI Persona:</span>
+        <select id="assistant-agent-select" onchange="app.changeAgent(this.value)" style="width:auto;padding:6px 12px;border-radius:20px;font-weight:600;font-size:12px;border:1px solid var(--primary)">
+        <option value="mr_female">👩 स्वराली (Marathi)</option>
+        <option value="en_female">👩 Samantha (English)</option>
+        <option value="en_male">👨 David (English)</option>
+        </select>
+    </div>
+    <!-- NEW TRIP CONTEXT SELECTOR -->
+    <div>
+        <span style="font-size:12px;font-weight:700;color:var(--text-sub)">📍 Context:</span>
+        <select id="ai-context-group" style="width:auto;padding:6px 12px;border-radius:20px;font-weight:600;font-size:12px;border:1px solid var(--primary)">
+            <option value="ALL">All Trips</option>
+        </select>
+    </div>
+</div>
+<div style="width:80px;height:80px;border-radius:50%;background:rgba(16,185,129,.15);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:36px;margin:16px auto;cursor:pointer" id="mic-status-btn" onclick="app.toggleVoiceRecording()">🎙️</div>
+<div><h3 id="voice-status-text">माइक बंद</h3></div>
+<div class="flex space-x-2 w-full mt-4">
+<input type="text" id="ai-text-input" placeholder="Type your query..." onkeydown="if(event.key==='Enter'){event.preventDefault();app.submitAiText()}">
+<button class="btn btn-primary" onclick="app.submitAiText()">Send</button>
+</div>
+<div class="card space-y-3 text-left" style="background:var(--bg-sub)"><span style="font-size:11px;font-weight:700;color:var(--text-sub)" data-t="transcript">VOICE TRANSCRIPT</span><p id="assistant-transcript" style="font-size:14px;font-style:italic">"..."</p></div>
+<div class="card space-y-3 text-left" style="background:var(--bg-card);border-color:var(--primary)"><span style="font-size:11px;font-weight:700;color:var(--primary)" data-t="response">AI RESPONSE</span><p id="assistant-response" style="font-size:14px;font-weight:600;line-height:1.5;">How can I help you today?</p></div>
+<div class="grid grid-cols-2 gap-3">
+<button class="btn btn-secondary" onclick="app.processVoiceText(this.innerText)" data-t="whoOwesMe">❓ Who owes me?</button>
+<button class="btn btn-secondary" onclick="app.processVoiceText(this.innerText)" data-t="howMuchOwe">💸 How much I owe?</button>
+<button class="btn btn-secondary" onclick="app.processVoiceText(this.innerText)" data-t="foodSpendBtn">🍔 Food expenses?</button>
+<button class="btn btn-secondary" onclick="app.processVoiceText(this.state?.lang==='mr'?'डॅशबोर्ड':'Dashboard')">📊 Dashboard</button>
+</div>
+</div>
+</section>
+
+<section id="view-quiz" class="hidden space-y-6">
+<div class="flex justify-between items-center"><h2 data-t="quiz">💡 Dynamic Trip Quiz</h2><span class="badge" style="background:#d1fae5;color:#047857" id="quiz-score-badge">Score: 0 / 0</span></div>
+<div class="card space-y-6" id="quiz-card-container"></div>
+</section>
+
+<section id="view-settings" class="hidden space-y-6">
+<h2 data-t="settings">Settings & Profile</h2>
+<div class="card space-y-4">
+<h3 data-t="profileSettings">👤 Profile Settings</h3>
+<div><label style="font-size:12px;font-weight:600">Your Full Name</label><input type="text" id="set-name"></div>
+<div><label style="font-size:12px;font-weight:600" data-t="emailOptional">Email</label><input type="email" id="set-email"></div>
+<div><label style="font-size:12px;font-weight:600" data-t="phoneOptional">Phone</label><input type="tel" id="set-phone"></div>
+<button class="btn btn-primary" onclick="app.saveProfile()">Save Profile</button>
+</div>
+<div class="card space-y-4">
+<h3>🎙️ AI Voice Persona</h3>
+<select id="voice-persona-select" onchange="app.changeAgent(this.value)" style="width:100%;padding:10px 14px;border-radius:10px;font-weight:600;border:1px solid var(--primary)">
+<option value="mr_female">👩 स्वराली (Marathi Female)</option>
+<option value="en_female">👩 Samantha (English Female)</option>
+<option value="en_male">👨 David (English Male)</option>
+</select>
+<button class="btn btn-secondary w-full" onclick="app.testVoice()">🔊 Test Voice</button>
+</div>
+<div class="card space-y-4">
+<button class="btn btn-secondary" onclick="app.exportCSV()" data-t="exportData">📥 Export CSV</button>
+<button class="btn btn-danger" onclick="app.resetAllData()" data-t="resetData">🗑️ Clear All Data</button>
+</div>
+</section>
+</main>
+</div>
+</div>
+
+<button class="fab-ai" onclick="app.navigateTo('assistant')">🎙️</button>
+<nav class="mobile-nav">
+<button class="mobile-nav-btn" onclick="app.navigateTo('dashboard')">📊<span>Home</span></button>
+<button class="mobile-nav-btn" onclick="app.navigateTo('groups')">👥<span>Groups</span></button>
+<button class="mobile-nav-btn" onclick="app.openExpenseModal()" style="font-size:20px;color:var(--primary)">➕</button>
+<button class="mobile-nav-btn" onclick="app.navigateTo('assistant')">🎙️<span>Voice</span></button>
+<button class="mobile-nav-btn" onclick="app.navigateTo('settings')">⚙️<span>Profile</span></button>
+</nav>
+
+<!-- MODALS -->
+<div id="modal-expense" class="modal-overlay hidden"><div class="modal-content space-y-4" style="max-width:500px">
+<div class="flex justify-between items-center"><h3 data-t="addExpense">Add Expense</h3><button onclick="app.closeModal('modal-expense')" style="border:none;background:none;cursor:pointer;font-size:18px">✕</button></div>
+<form onsubmit="app.saveExpense(event)" class="space-y-3">
+<select id="exp-group" required onchange="app.updateExpensePaidByOptions()"></select>
+<select id="exp-paidby" required></select>
+<input type="text" id="exp-desc" placeholder="Description" required>
+<input type="number" step="0.01" id="exp-amt" placeholder="Amount" required>
+<select id="exp-cat"><option value="Food">🍲 Food</option><option value="Transport">🚕 Transport</option><option value="Lodging">🏨 Lodging</option><option value="Others">🏷️ Others</option></select>
+<input type="date" id="exp-date" required>
+<div class="flex justify-end pt-2"><button type="submit" class="btn btn-primary">Save</button></div>
+</form></div></div>
+
+<div id="modal-group" class="modal-overlay hidden"><div class="modal-content space-y-4" style="max-width:500px">
+<div class="flex justify-between items-center"><h3 id="modal-group-header-title">Create Group</h3><button type="button" onclick="app.closeModal('modal-group')" style="border:none;background:none;cursor:pointer;font-size:18px">✕</button></div>
+<form onsubmit="app.saveGroup(event)" class="space-y-3">
+<input type="hidden" id="grp-edit-id"><input type="text" id="grp-name" placeholder="Group/Trip Name" required>
+<div class="grid grid-cols-2 gap-3"><select id="grp-type"><option value="Trip">🏖️ Trip</option><option value="Event">🎉 Event</option></select>
+<input type="number" id="grp-budget" placeholder="Budget"></div>
+
+<div style="margin-top: 10px; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; background: var(--bg-sub);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #cbd5e1;">
+        <span style="font-size:13px; font-weight:700; color:var(--text-main);">👥 Members</span>
+        <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:700; color:var(--primary); cursor:pointer;">
+            <input type="checkbox" id="select-all-members" onchange="app.toggleSelectAllMembers(this)"> Select All
+        </label>
+    </div>
+    <div id="grp-members-checkboxes" class="checkbox-group" style="margin-top:0;"></div>
+</div>
+
+<div class="flex justify-end pt-2 space-x-2"><button type="button" class="btn btn-secondary" onclick="app.closeModal('modal-group')">Cancel</button>
+<button type="submit" class="btn btn-primary">Save</button></div>
+</form></div></div>
+
+<div id="modal-group-details" class="modal-overlay hidden"><div class="modal-content space-y-4">
+<div class="flex justify-between items-center"><h3 id="grp-detail-modal-title">Trip Ledger</h3><button onclick="app.closeModal('modal-group-details')" style="border:none;background:none;cursor:pointer;font-size:18px">✕</button></div>
+<div class="budget-bar">
+<div class="budget-stat"><span class="budget-label">Budget</span><span class="budget-val" id="inline-sheet-budget">₹0</span></div>
+<div class="budget-stat"><span class="budget-label">Spent</span><span class="budget-val" style="color:var(--primary)" id="inline-sheet-total">₹0</span></div>
+<div class="budget-stat"><span class="budget-label">Remaining</span><span class="budget-val" id="inline-sheet-remaining">₹0</span></div>
+</div>
+<div><label style="font-size:12px;font-weight:700;color:var(--text-sub)" data-t="notesLabel">📝 Notes</label><textarea id="trip-notes-area" class="notes-area"></textarea></div>
+<div class="space-y-2">
+<div class="flex justify-between items-center"><span style="font-size:13px;font-weight:700">Sub-Sheet</span>
+<div class="flex space-x-2"><button class="btn btn-secondary" style="padding:6px 12px;font-size:11px" onclick="app.exportSpecificGroupCSV()">📥 CSV</button>
+<button class="btn btn-primary" style="padding:6px 12px;font-size:11px" onclick="app.addInlineExpenseRow()">+ Row</button></div></div>
+<div class="table-responsive" style="max-height:250px"><input type="hidden" id="active-detail-group-id">
+<table><thead><tr><th>Date</th><th>Desc</th><th>Cat</th><th>Amt</th><th>Paid By</th><th></th></tr></thead><tbody id="inline-sheet-tbody"></tbody></table></div>
+</div>
+<div><label style="font-size:12px;font-weight:700;color:var(--text-sub)" data-t="uploadPhotosLabel">📷 Photos</label>
+<input type="file" id="trip-file-upload" accept="image/*" onchange="app.handleTripPhotoUpload(event)" style="margin-top:6px; background:var(--bg-card);">
+<div id="trip-photos-container" class="flex flex-wrap gap-3 mt-3"></div></div>
+<div class="flex justify-end pt-4"><button class="btn btn-primary" onclick="app.saveInlineSheetChanges()">💾 Save All</button></div>
+</div></div>
+
+<div id="modal-settle" class="modal-overlay hidden"><div class="modal-content space-y-4" style="max-width:400px">
+<div class="flex justify-between items-center"><h3>Record Settlement</h3><button type="button" onclick="app.closeModal('modal-settle')" style="border:none;background:none;cursor:pointer;font-size:18px">✕</button></div>
+<form onsubmit="app.recordSettlement(event)" class="space-y-3">
+<select id="settle-group" required onchange="app.updateSettleMemberOptions()"></select>
+<select id="settle-payer" required></select>
+<select id="settle-payee" required></select>
+<input type="number" step="0.01" id="settle-amt" placeholder="Amount" required>
+<div class="flex justify-end pt-2"><button type="submit" class="btn btn-primary">Record</button></div>
+</form></div></div>
+
+<div id="modal-member" class="modal-overlay hidden"><div class="modal-content space-y-4" style="max-width:400px">
+<div class="flex justify-between items-center"><h3 id="member-modal-title">Add Member</h3><button type="button" onclick="app.closeModal('modal-member')" style="border:none;background:none;cursor:pointer;font-size:18px">✕</button></div>
+<form onsubmit="app.saveMember(event)" class="space-y-3">
+<input type="hidden" id="mem-edit-id"><input type="text" id="mem-name" placeholder="Name" required>
+<input type="email" id="mem-email" placeholder="Email"><input type="tel" id="mem-phone" placeholder="Phone">
+<div class="flex justify-end pt-2 space-x-2"><button type="button" class="btn btn-secondary" onclick="app.closeModal('modal-member')">Cancel</button>
+<button type="submit" class="btn btn-primary">Save</button></div>
+</form></div></div>
+
+<script>
+const TRANSLATIONS = {
+en:{dashboard:"Dashboard",groups:"Groups / Trips",expenses:"Expense History",members:"Manage Members",assistant:"AI Voice Assistant",quiz:"Dynamic Quiz",settings:"Settings & Profile",addExpense:"+ Add Expense",newGroup:"+ New Group",settleUp:"🤝 Settle Up",youOwe:"You Owe",youAreOwed:"You Are Owed",totalSpend:"Total Spending",tripSummaries:"🏕️ Trip Ledgers",simplifiedDebts:"⚡ Repayments",welcome:"Welcome",overview:"Master Overview",overviewSub:"Summary across all active ledgers.",speakMic:"Listening... (Speak Now)",transcript:"VOICE TRANSCRIPT",response:"AI RESPONSE",whoOwesMe:"❓ Who owes me?",howMuchOwe:"💸 How much I owe?",foodSpendBtn:"🍔 Food expenses?",exportData:"📥 Export CSV",resetData:"🗑️ Clear All Data",addMemberBtn:"+ Add Member",emailOptional:"Email (Optional)",phoneOptional:"Phone (Optional)",notesLabel:"📝 Notes",uploadPhotosLabel:"📷 Photos",profileSettings:"👤 Profile",bin:"Recycle Bin",selectAgent:"🤖 Select AI Agent"},
+mr:{dashboard:"डॅशबोर्ड",groups:"ग्रुप्स व ट्रिप्स",expenses:"खर्चाचा इतिहास",members:"सदस्य व्यवस्थापन",assistant:"AI व्हॉईस असिस्टंट",quiz:"डायनॅमिक क्विझ",settings:"सेटिंग्ज आणि प्रोफाइल",addExpense:"+ खर्च जोडा",newGroup:"+ नवीन ट्रिप",settleUp:"🤝 सेटल अप",youOwe:"तुमची देणे",youAreOwed:"तुमची येणे",totalSpend:"एकूण खर्च",tripSummaries:"🏕️ ट्रिप हिशोब",simplifiedDebts:"⚡ सोपे व्यवहार",welcome:"नमस्कार",overview:"मास्टर हिशोब",overviewSub:"सर्व ट्रिप्सची स्थिती.",speakMic:"ऐकत आहे... (आता बोला)",transcript:"तुम्ही म्हणालात",response:"AI उत्तर",whoOwesMe:"❓ माझे कोणाकडे पैसे?",howMuchOwe:"💸 मला कोणाला द्यायचे?",foodSpendBtn:"🍔 जेवणावर खर्च?",exportData:"📥 CSV डाउनलोड",resetData:"🗑️ सर्व डेटा साफ",addMemberBtn:"+ नवीन सदस्य",emailOptional:"ईमेल (पर्यायी)",phoneOptional:"फोन (पर्यायी)",notesLabel:"📝 नोंदी",uploadPhotosLabel:"📷 फोटो",profileSettings:"👤 प्रोफाइल",bin:"ट्रॅश / बिन",selectAgent:"🤖 AI एजंट निवडा"}
+};
+
+const STORAGE_KEY = 'sharespend_pro_v_final_build_14';
+const INITIAL_STATE = {
+lang:'mr',currency:'INR',symbol:'₹',theme:'light',voicePersona:'mr_female',
+profile:{name:'Admin User',email:'admin@sharespend.app',phone:''},
+users:[{id:'u_you',name:'Admin User',email:'admin@sharespend.app',phone:''}],
+groups:[{id:'g_cycle',name:'Cycling Tour',type:'Trip',budget:15000,members:['u_you'],notes:'',photos:[]}],
+expenses:[],settlements:[],quizIndex:0,quizScore:0,bin:{groups:[],users:[],expenses:[]}
+};
+
+window.onerror = function(msg,url,line,col,err){
+console.error(msg,line,err);
+const t=document.createElement('div');t.className='toast';t.style.background='#b91c1c';
+t.innerText='Error: '+(msg||'unknown')+' (line '+line+')';document.body.appendChild(t);
+setTimeout(()=>t.remove(),5000);return false;
+};
+
+class ShareSpendPro {
+constructor(){
+this.state=this.loadState();
+if(!this.state.bin) this.state.bin={groups:[],users:[],expenses:[]};
+this.isContinuousListening=false;this.isSpeaking=false;this.recognition=null;this.availableVoices=[];this.currentUtterance=null;
+this.initSpeechRecognition();this.initSpeechSynthesis();
+document.getElementById('voice-persona-select').value=this.state.voicePersona||'mr_female';
+document.getElementById('assistant-agent-select').value=this.state.voicePersona||'mr_female';
+document.getElementById('currency-select').value=this.state.currency||'INR';
+this.applyTranslations();this.syncProfileView();
+document.addEventListener('click',e=>{if(e.target.classList.contains('modal-overlay'))e.target.classList.add('hidden')});
+document.addEventListener('keydown',e=>{
+if(e.key==='Escape'){
+document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m=>m.classList.add('hidden'));
+if(this.isContinuousListening&&this.recognition){try{this.recognition.stop()}catch(err){}this.isContinuousListening=false;
+document.getElementById('mic-status-btn')?.classList.remove('pulse-mic');document.querySelector('.fab-ai')?.classList.remove('pulse-mic')}
+}});
+}
+
+loadState(){try{const s=localStorage.getItem(STORAGE_KEY);return s?JSON.parse(s):JSON.parse(JSON.stringify(INITIAL_STATE))}catch(e){return JSON.parse(JSON.stringify(INITIAL_STATE))}}
+saveState(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(this.state))}catch(e){}}
+
+toggleDarkMode(){this.state.theme=this.state.theme==='dark'?'light':'dark';document.documentElement.className=this.state.theme;this.saveState()}
+changeLanguage(lang){
+this.state.lang=lang;
+const isMale=(this.state.voicePersona||'').endsWith('_male');
+this.state.voicePersona = lang==='mr' ? 'mr_female' : (isMale?'en_male':'en_female');
+document.getElementById('voice-persona-select').value=this.state.voicePersona;
+document.getElementById('assistant-agent-select').value=this.state.voicePersona;
+this.saveState();this.applyTranslations();this.syncProfileView();
+}
+changeCurrency(c){this.state.currency=c;this.state.symbol=c==='INR'?'₹':c==='USD'?'$':c==='EUR'?'€':'£';this.saveState();this.renderAll()}
+formatMoney(a){return `${this.state.symbol}${Number(a||0).toLocaleString('en-IN',{minimumFractionDigits:2})}`}
+getUser(id){return this.state.users.find(u=>u.id===id)||{name:'Unknown'}}
+getGroup(id){return this.state.groups.find(g=>g.id===id)||{name:'Group',notes:'',members:[],photos:[]}}
+
+syncProfileView(){
+const p=this.state.profile||{name:'Admin User',email:'admin@sharespend.app',phone:''};
+const me=this.state.users.find(u=>u.id==='u_you');
+const name=me?me.name:p.name,email=(me&&me.email)?me.email:p.email,phone=(me&&me.phone)?me.phone:p.phone;
+document.getElementById('sidebar-name').innerText=name;
+document.getElementById('sidebar-email').innerText=email;
+document.getElementById('sidebar-avatar').innerText=name.slice(0,2).toUpperCase();
+document.getElementById('set-name').value=name;document.getElementById('set-email').value=email;document.getElementById('set-phone').value=phone||'';
+const dict=TRANSLATIONS[this.state.lang||'mr'];
+document.getElementById('dash-greeting').innerText=`${dict.welcome}, ${name.split(' ')[0]} 👋`;
+}
+saveProfile(){
+const name=document.getElementById('set-name').value.trim(),email=document.getElementById('set-email').value.trim(),phone=document.getElementById('set-phone').value.trim();
+if(name){this.state.profile={name,email,phone};const me=this.state.users.find(u=>u.id==='u_you');if(me){me.name=name;me.email=email;me.phone=phone}}
+this.saveState();this.syncProfileView();this.renderAll();this.showToast(this.state.lang==='mr'?'प्रोफाइल सेव्ह!':'Profile saved!');
+}
+applyTranslations(){
+const dict=TRANSLATIONS[this.state.lang||'mr'];
+document.getElementById('lang-select').value=this.state.lang;
+document.querySelectorAll('[data-t]').forEach(el=>{const k=el.getAttribute('data-t');if(dict[k]){if(el.tagName==='INPUT'&&el.hasAttribute('placeholder'))el.placeholder=dict[k];else el.innerText=dict[k]}});
+const inp=document.getElementById('ai-text-input');
+if(inp) inp.placeholder = this.state.lang==='mr' ? 'तुमचा प्रश्न टाइप करा...' : 'Type your query...';
+this.renderAll();
+}
+navigateTo(v){
+document.querySelectorAll('main>section').forEach(s=>s.classList.add('hidden'));
+document.getElementById('view-'+v).classList.remove('hidden');
+document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+const n=document.getElementById('nav-'+v);if(n)n.classList.add('active');
+if(v==='quiz'){this.generateDynamicQuiz();this.renderQuiz()}
+if(v==='settings')this.syncProfileView();
+this.renderAll();
+}
+closeModal(id){document.getElementById(id).classList.add('hidden')}
+
+calculateBalances(expenses = this.state.expenses, settlements = this.state.settlements){
+const bal={};this.state.users.forEach(u=>bal[u.id]=0);
+expenses.forEach(e=>{if(bal[e.paidBy]!==undefined)bal[e.paidBy]+=Number(e.amount);Object.entries(e.splits||{}).forEach(([id,s])=>{if(bal[id]!==undefined)bal[id]-=Number(s)})});
+settlements.forEach(s=>{if(bal[s.payerId]!==undefined)bal[s.payerId]+=Number(s.amount);if(bal[s.payeeId]!==undefined)bal[s.payeeId]-=Number(s.amount)});
+return bal;
+}
+simplifyDebts(bal){
+const debtors=[],creditors=[],txs=[];
+Object.entries(bal).forEach(([id,a])=>{if(a<-0.01)debtors.push({id,amount:-a});else if(a>0.01)creditors.push({id,amount:a})});
+let i=0,j=0;while(i<debtors.length&&j<creditors.length){const d=debtors[i],c=creditors[j],t=Math.min(d.amount,c.amount);if(t>0.01)txs.push({from:d.id,to:c.id,amount:t});d.amount-=t;c.amount-=t;if(d.amount<0.01)i++;if(c.amount<0.01)j++}
+return txs;
+}
+
+renderAll(){
+const isMr = this.state.lang === 'mr';
+let globalOwe = 0, globalOwed = 0;
+let debtsHTML = '';
+const globalBal = this.calculateBalances(); 
+
+this.state.groups.forEach(g => {
+    const gExps = this.state.expenses.filter(e => e.groupId === g.id);
+    const gSetts = this.state.settlements.filter(s => s.groupId === g.id);
+    const bal = this.calculateBalances(gExps, gSetts);
+    const txs = this.simplifyDebts(bal);
+    
+    txs.forEach(t => {
+        if (t.from === 'u_you') globalOwe += t.amount;
+        if (t.to === 'u_you') globalOwed += t.amount;
         
-        <!-- SIDEBAR DESKTOP -->
-        <aside class="sidebar">
-            <div class="space-y-6">
-                <div class="flex items-center space-x-3 cursor-pointer" onclick="app.navigateTo('dashboard')">
-                    <div id="sidebar-logo-box" style="width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, #10b981, #0ea5e9); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 20px;">₹</div>
-                    <div>
-                        <h2 id="brand-name-text" style="font-size: 18px; font-weight: 800;">ShareSpend</h2>
-                        <p id="brand-sub-text" style="font-size: 11px; color: var(--text-sub);">Split Expenses</p>
-                    </div>
-                </div>
-
-                <button class="btn btn-primary w-full" id="btn-sidebar-add" onclick="app.openExpenseModal()" data-t="addExpense">+ Add Expense</button>
-
-                <nav class="space-y-2">
-                    <button class="nav-btn active" id="nav-dashboard" onclick="app.navigateTo('dashboard')">📊 <span data-t="dashboard">Dashboard</span></button>
-                    <button class="nav-btn" id="nav-groups" onclick="app.navigateTo('groups')">👥 <span data-t="groups">Groups / Trips</span></button>
-                    <button class="nav-btn" id="nav-expenses" onclick="app.navigateTo('expenses')">📜 <span data-t="expenses">Expense History</span></button>
-                    <button class="nav-btn" id="nav-members" onclick="app.navigateTo('members')">👤 <span data-t="members">Manage Members</span></button>
-                    <button class="nav-btn" id="nav-assistant" onclick="app.navigateTo('assistant')">🎙️ <span data-t="assistant">AI Voice Assistant</span></button>
-                    <button class="nav-btn" id="nav-quiz" onclick="app.navigateTo('quiz')">💡 <span data-t="quiz">Financial Quiz</span></button>
-                    <button class="nav-btn" id="nav-settings" onclick="app.navigateTo('settings')">⚙️ <span data-t="settings">Settings & Profile</span></button>
-                </nav>
-            </div>
-
-            <div style="padding-top: 16px; border-top: 1px solid var(--border-color);">
-                <div style="display: flex; align-items: center; gap: 12px; cursor: pointer;" onclick="app.navigateTo('settings')">
-                    <div id="sidebar-avatar" style="width: 36px; height: 36px; border-radius: 50%; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 12px;">ME</div>
-                    <div style="min-width: 0;">
-                        <p id="sidebar-name" style="font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Your Name</p>
-                        <p id="sidebar-email" style="font-size: 10px; color: var(--text-sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">user@example.com</p>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- MAIN WRAPPER -->
-        <div class="main-wrapper">
-            <header>
-                <h1 id="page-title" style="font-size: 18px; font-weight: 700;">Dashboard</h1>
-                <div class="flex items-center space-x-3">
-                    <select id="lang-select" onchange="app.changeLanguage(this.value)" style="width: auto; padding: 6px 12px; font-weight: 700; border-color: var(--primary);">
-                        <option value="mr">🌐 मराठी (Marathi)</option>
-                        <option value="en">🌐 English</option>
-                    </select>
-                    
-                    <button class="btn btn-accent" onclick="app.navigateTo('assistant')">🎙️ Voice</button>
-                    <select id="currency-select" onchange="app.changeCurrency(this.value)" style="width: auto; padding: 6px 12px;">
-                        <option value="INR">₹ INR</option>
-                        <option value="USD">$ USD</option>
-                        <option value="EUR">€ EUR</option>
-                        <option value="GBP">£ GBP</option>
-                    </select>
-                    <button class="btn btn-secondary" onclick="app.toggleDarkMode()">🌙</button>
-                </div>
-            </header>
-
-            <main>
-                <!-- DASHBOARD VIEW -->
-                <section id="view-dashboard" class="space-y-6">
-                    <div class="banner">
-                        <div>
-                            <span style="font-size: 11px; font-weight: 700; color: #34d399; text-transform: uppercase;" data-t="overview">Master Overview</span>
-                            <h2 style="font-size: 22px; font-weight: 800; margin-top: 4px;" id="dash-greeting">Welcome 👋</h2>
-                            <p style="font-size: 13px; color: #cbd5e1; margin-top: 4px;" data-t="overviewSub">Master summary across all trips and active group ledgers.</p>
-                        </div>
-                        <div class="space-x-2 flex">
-                            <button class="btn btn-secondary" onclick="app.exportCSV()" data-t="exportData">📥 Master CSV</button>
-                            <button class="btn btn-primary" id="dash-settle-btn" onclick="app.openSettleModal()" data-t="settleUp">🤝 1-Click Settle Up</button>
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="card space-y-2">
-                            <span style="font-size: 12px; color: var(--text-sub); font-weight: 600;" data-t="youOwe">You Owe</span>
-                            <h3 style="font-size: 24px; font-weight: 800; color: var(--danger);" id="dash-owe">₹0.00</h3>
-                            <p style="font-size: 11px; color: var(--text-sub);" data-t="payableBalance">Payable balance</p>
-                        </div>
-                        <div class="card space-y-2">
-                            <span style="font-size: 12px; color: var(--text-sub); font-weight: 600;" data-t="youAreOwed">You Are Owed</span>
-                            <h3 style="font-size: 24px; font-weight: 800; color: var(--primary);" id="dash-owed">₹0.00</h3>
-                            <p style="font-size: 11px; color: var(--text-sub);" data-t="receivableBalance">Receivable balance</p>
-                        </div>
-                        <div class="card space-y-2">
-                            <span style="font-size: 12px; color: var(--text-sub); font-weight: 600;" data-t="totalSpend">Total Spending</span>
-                            <h3 style="font-size: 24px; font-weight: 800;" id="dash-total">₹0.00</h3>
-                            <p style="font-size: 11px; color: var(--text-sub);" id="dash-exp-count" data-t="acrossExpenses">Across all expenses</p>
-                        </div>
-                    </div>
-
-                    <!-- CLICKABLE INDIVIDUAL TRIP & GROUP SUMMARIES ON DASHBOARD -->
-                    <div class="card space-y-4">
-                        <h3 style="font-size: 16px; font-weight: 700;" data-t="tripSummaries">🏕️ Individual Trip & Group Ledgers</h3>
-                        <div id="dashboard-trips-overview" class="grid grid-cols-2 gap-4"></div>
-                    </div>
-
-                    <div class="card space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h3 style="font-size: 16px; font-weight: 700;" data-t="simplifiedDebts">⚡ Simplified Repayments (Auto-Optimized)</h3>
-                            <button class="btn btn-secondary" onclick="app.openSettleModal()" style="font-size: 11px;" data-t="settleUp">Settle Up</button>
-                        </div>
-                        <div id="debts-list" class="grid grid-cols-2 gap-3"></div>
-                    </div>
-
-                    <div class="card space-y-4">
-                        <h3 style="font-size: 16px; font-weight: 700;" data-t="recentExpenses">Recent Expenses</h3>
-                        <div id="recent-expenses-list" class="space-y-3"></div>
-                    </div>
-                </section>
-
-                <!-- GROUPS VIEW -->
-                <section id="view-groups" class="hidden space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 data-t="groups">Groups / Trips</h2>
-                        <div class="space-x-2 flex">
-                            <button class="btn btn-secondary" onclick="document.getElementById('csv-import-input').click()" data-t="uploadCSV">📤 Import CSV Sheet</button>
-                            <input type="file" id="csv-import-input" accept=".csv" class="hidden" onchange="app.importCSV(event)">
-                            <button class="btn-primary btn" onclick="app.openGroupModal()" data-t="newGroup">+ New Group</button>
-                        </div>
-                    </div>
-                    <div id="groups-list" class="grid grid-cols-3 gap-4"></div>
-                </section>
-
-                <!-- EXPENSES VIEW -->
-                <section id="view-expenses" class="hidden space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 data-t="expenses">Expense Ledger</h2>
-                        <div class="space-x-2 flex">
-                            <button class="btn btn-secondary" onclick="document.getElementById('csv-import-input').click()" data-t="uploadCSV">📤 Import CSV Sheet</button>
-                            <button class="btn btn-secondary" onclick="app.exportCSV()" data-t="exportData">📥 Export CSV</button>
-                            <button class="btn btn-primary" onclick="app.openExpenseModal()" data-t="addExpense">+ Add Expense</button>
-                        </div>
-                    </div>
-                    <div id="all-expenses-list" class="space-y-3"></div>
-                </section>
-
-                <!-- MEMBERS VIEW -->
-                <section id="view-members" class="hidden space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 data-t="members">Manage Members</h2>
-                        <button class="btn btn-primary" onclick="app.openAddMemberModal()" data-t="addMemberBtn">+ Add Member</button>
-                    </div>
-                    <p style="font-size: 13px; color: var(--text-sub);" data-t="membersSub">Add or manage unlimited friends and group members here.</p>
-                    <div id="members-list" class="grid grid-cols-2 gap-4"></div>
-                </section>
-
-                <!-- AI VOICE ASSISTANT VIEW -->
-                <section id="view-assistant" class="hidden space-y-6">
-                    <h2 data-t="assistant">🎙️ Interactive AI Voice Assistant</h2>
-                    <div class="card space-y-6 text-center" style="padding: 32px; border: 2px solid var(--primary);">
-                        
-                        <div style="width: 80px; height: 80px; border-radius: 50%; background: rgba(16, 185, 129, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 36px; margin: 0 auto; cursor: pointer;" id="mic-status-btn" onclick="app.toggleVoiceRecording()">
-                            🎙️
-                        </div>
-                        <div>
-                            <h3 id="voice-status-text" data-t="speakMic">Listening... (Speak Now)</h3>
-                            <p style="font-size: 11px; color: var(--text-sub); margin-top: 6px; font-weight: 700; background: var(--bg-sub); display: inline-block; padding: 4px 12px; border-radius: 20px;" id="esc-hint-text">(बाहेर पडण्यासाठी ESC दाबा / Press ESC to Stop & Exit)</p>
-                        </div>
-
-                        <div class="card space-y-3 text-left" style="background: var(--bg-sub);">
-                            <div class="flex justify-between items-center">
-                                <span style="font-size: 11px; font-weight: 700; color: var(--text-sub);" data-t="transcript">VOICE TRANSCRIPT</span>
-                                <button class="btn btn-secondary" style="font-size: 10px; padding: 4px 8px;" onclick="app.speakAssistantResponse()">🔊 Repeat Audio</button>
-                            </div>
-                            <p id="assistant-transcript" style="font-size: 14px; font-style: italic; color: var(--text-main);">"..."</p>
-                        </div>
-
-                        <div class="card space-y-3 text-left" style="background: var(--bg-card); border-color: var(--primary);">
-                            <span style="font-size: 11px; font-weight: 700; color: var(--primary);" data-t="response">AI RESPONSE & AUDIO</span>
-                            <p id="assistant-response" style="font-size: 14px; font-weight: 600;">How can I help you today? Try asking about total spend, debts, categories, or trips!</p>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-3">
-                            <button class="btn btn-secondary" onclick="app.processVoiceText('कोणाकडे पैसे बाकी आहेत?')" data-t="whoOwesMe">❓ "Who owes me?"</button>
-                            <button class="btn btn-secondary" onclick="app.processVoiceText('जेवणावर किती खर्च झाला?')" data-t="foodSpendBtn">🍔 "Food expenses?"</button>
-                            <button class="btn btn-secondary" onclick="app.processVoiceText('ट्रिपचा सारांश सांग')" data-t="summarizeTrip">🏖️ "Summarize trip"</button>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- FINANCIAL QUIZ VIEW -->
-                <section id="view-quiz" class="hidden space-y-6">
-                    <div class="flex justify-between items-center">
-                        <h2 data-t="quiz">💡 Financial Literacy Quiz</h2>
-                        <span class="badge" style="background: #d1fae5; color: #047857; padding: 4px 10px; border-radius: 20px; font-weight: 700;" id="quiz-score-badge">Score: 0 / 2</span>
-                    </div>
-                    <div class="card space-y-6" id="quiz-card-container"></div>
-                </section>
-
-                <!-- SETTINGS VIEW -->
-                <section id="view-settings" class="hidden space-y-6">
-                    <h2 data-t="settings">Settings & Profile</h2>
-                    
-                    <div class="card space-y-4">
-                        <h3>Profile Details</h3>
-                        <div>
-                            <label style="font-size: 12px; font-weight: 600;">Your Full Name</label>
-                            <input type="text" id="set-name" placeholder="Enter Full Name">
-                        </div>
-                        <div>
-                            <label style="font-size: 12px; font-weight: 600;">Email Address</label>
-                            <input type="email" id="set-email" placeholder="Enter Email">
-                        </div>
-                        <button class="btn btn-primary" onclick="app.saveProfile()" data-t="saveProfile">Save Profile</button>
-                    </div>
-
-                    <div class="card space-y-4">
-                        <h3>🎙️ Natural Voice & Speech Engine Settings</h3>
-                        <p style="font-size: 12px; color: var(--text-sub);">Select Male or Female voice profile.</p>
-                        
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label style="font-size: 12px; font-weight: 600;">Voice Option</label>
-                                <select id="voice-gender-select" onchange="app.updateVoiceSettings()">
-                                    <option value="female_mr">👧 Female Voice - Marathi (स्त्री - मराठी)</option>
-                                    <option value="male_mr">👦 Male Voice - Marathi (पुरुष - मराठी)</option>
-                                    <option value="female_en">👧 Female Voice - English (स्त्री - इंग्रजी)</option>
-                                    <option value="male_en">👦 Male Voice - English (पुरुष - इंग्रजी)</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-size: 12px; font-weight: 600;">System Voice (Optional)</label>
-                                <select id="voice-system-select" onchange="app.updateVoiceSettings()">
-                                    <option value="">Auto-Select Voice</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label style="font-size: 12px; font-weight: 600;">Speed: <span id="val-rate">0.88</span>x</label>
-                                <input type="range" id="voice-rate-slider" min="0.6" max="1.2" step="0.04" value="0.88" oninput="document.getElementById('val-rate').innerText = this.value; app.updateVoiceSettings();">
-                            </div>
-                            <div>
-                                <label style="font-size: 12px; font-weight: 600;">Pitch: <span id="val-pitch">1.0</span></label>
-                                <input type="range" id="voice-pitch-slider" min="0.7" max="1.3" step="0.05" value="1.0" oninput="document.getElementById('val-pitch').innerText = this.value; app.updateVoiceSettings();">
-                            </div>
-                        </div>
-
-                        <button class="btn btn-secondary w-full" onclick="app.testVoiceSettings()" data-t="testAudioBtn">🔊 Test Audio Output</button>
-                    </div>
-                    
-                    <div class="card space-y-4">
-                        <div class="flex space-x-3">
-                            <button class="btn btn-secondary" onclick="app.exportCSV()" data-t="exportData">📥 Export CSV</button>
-                            <button class="btn btn-danger" onclick="app.resetAllData()" data-t="resetData">🗑️ Clear All Data</button>
-                        </div>
-                    </div>
-                </section>
-            </main>
-        </div>
-    </div>
-
-    <!-- MOBILE NAVIGATION -->
-    <nav class="mobile-nav">
-        <button class="mobile-nav-btn" onclick="app.navigateTo('dashboard')">📊<span data-t="dashboard">Home</span></button>
-        <button class="mobile-nav-btn" onclick="app.navigateTo('groups')">👥<span data-t="groups">Groups</span></button>
-        <button class="mobile-nav-btn" onclick="app.openExpenseModal()" style="font-size: 20px; color: var(--primary);">➕</button>
-        <button class="mobile-nav-btn" onclick="app.navigateTo('assistant')">🎙️<span data-t="assistant">Voice</span></button>
-        <button class="mobile-nav-btn" onclick="app.navigateTo('settings')">⚙️<span data-t="settings">Profile</span></button>
-    </nav>
-
-    <!-- MODAL EXPENSE -->
-    <div id="modal-expense" class="modal-overlay hidden">
-        <div class="modal-content space-y-4" style="max-width: 500px;">
-            <div class="flex justify-between items-center">
-                <h3 data-t="addExpense">Add Expense</h3>
-                <button onclick="app.closeExpenseModal()" style="border:none; background:none; cursor:pointer; font-size: 18px;">✕</button>
-            </div>
-            <form onsubmit="app.saveExpense(event)" class="space-y-3">
-                <div>
-                    <label style="font-size: 11px; font-weight: 600;" data-t="selectGroup">Group</label>
-                    <select id="exp-group" required></select>
-                </div>
-                <div>
-                    <label style="font-size: 11px; font-weight: 600;" data-t="paidBy">Paid By</label>
-                    <select id="exp-paidby" required></select>
-                </div>
-                <input type="text" id="exp-desc" placeholder="Description" required>
-                <input type="number" step="0.01" id="exp-amt" placeholder="Amount" required>
-                <div>
-                    <label style="font-size: 11px; font-weight: 600;" data-t="categoryLabel">Category</label>
-                    <select id="exp-cat">
-                        <option value="Food">🍲 Food & Dining / भोजन व नाश्ता</option>
-                        <option value="Transport">🚕 Transport & Cab / प्रवास व ट्रॅव्हल</option>
-                        <option value="Lodging">🏨 Lodging & Hotel / हॉटेल व मुक्काम</option>
-                        <option value="Groceries">🛒 Groceries / किराणा सामान</option>
-                        <option value="Others">🏷️ Others / इतर खर्च</option>
-                    </select>
-                </div>
-                <div>
-                    <label style="font-size: 11px; font-weight: 600;" data-t="uploadReceipt">📷 Upload Bill/Receipt Image</label>
-                    <input type="file" id="exp-image" accept="image/*" style="padding: 6px;">
-                </div>
-                <div>
-                    <label style="font-size: 11px; font-weight: 600;" data-t="dateLabel">Date</label>
-                    <input type="date" id="exp-date" required>
-                </div>
-                <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" class="btn btn-secondary" onclick="app.closeExpenseModal()" data-t="cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary" data-t="saveExpenseBtn">Save Expense</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL SETTLE UP -->
-    <div id="modal-settle" class="modal-overlay hidden">
-        <div class="modal-content space-y-4" style="max-width: 500px;">
-            <div class="flex justify-between items-center">
-                <h3 data-t="settleTitle">Record Settlement</h3>
-                <button onclick="app.closeSettleModal()" style="border:none; background:none; cursor:pointer; font-size: 18px;">✕</button>
-            </div>
-            <form onsubmit="app.recordSettlement(event)" class="space-y-3">
-                <div>
-                    <label style="font-size: 11px; font-weight: 600;" data-t="selectGroup">Group</label>
-                    <select id="settle-group" required></select>
-                </div>
-                <div>
-                    <label style="font-size: 11px; font-weight: 600;" data-t="payerLabel">Payer</label>
-                    <select id="settle-payer" required></select>
-                </div>
-                <div>
-                    <label style="font-size: 11px; font-weight: 600;" data-t="payeeLabel">Payee</label>
-                    <select id="settle-payee" required></select>
-                </div>
-                <input type="number" step="0.01" id="settle-amt" placeholder="Amount" required>
-                <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" class="btn btn-secondary" onclick="app.closeSettleModal()" data-t="cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary" data-t="saveExpenseBtn">Record Payment</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL CREATE / EDIT GROUP -->
-    <div id="modal-group" class="modal-overlay hidden">
-        <div class="modal-content space-y-4" style="max-width: 500px;">
-            <h3 id="modal-group-header-title" data-t="createGrpTitle">Create Group</h3>
-            <form onsubmit="app.saveGroup(event)" class="space-y-3">
-                <input type="hidden" id="grp-edit-id">
-                <input type="text" id="grp-name" placeholder="Group Name" required>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label style="font-size: 11px; font-weight: 600;" data-t="grpTypeLabel">Type</label>
-                        <select id="grp-type">
-                            <option value="Trip">🏖️ Trip / टूर</option>
-                            <option value="Home">🏠 Home / फ्लॅट</option>
-                            <option value="Event">🎉 Event / कार्यक्रम</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label style="font-size: 11px; font-weight: 600;" data-t="targetBudget">Target Budget (₹)</label>
-                        <input type="number" id="grp-budget" placeholder="10000">
-                    </div>
-                </div>
-                <div>
-                    <label style="font-size: 11px; font-weight: 600;">Select Members for this Group:</label>
-                    <div id="grp-members-checkboxes" class="checkbox-group"></div>
-                </div>
-                <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" class="btn btn-secondary" onclick="app.closeGroupModal()" data-t="cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary" id="btn-save-group-submit" data-t="saveGroupBtn">Save Group</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- MODAL GROUP INLINE EXPENSE SHEET -->
-    <div id="modal-group-details" class="modal-overlay hidden">
-        <div class="modal-content space-y-4" style="max-width: 850px;">
-            <div class="flex justify-between items-center">
-                <h3 id="grp-detail-modal-title">Trip Ledger & Manual Sheet</h3>
-                <button onclick="app.closeGroupDetailsModal()" style="border:none; background:none; cursor:pointer; font-size: 18px;">✕</button>
-            </div>
-            
-            <div class="space-y-4">
-                <div class="flex justify-between items-center">
-                    <span style="font-size: 13px; font-weight: 700;" data-t="groupSheetTitle">Manual Trip Expense Sub-Sheet</span>
-                    <button class="btn btn-primary" style="padding: 6px 12px; font-size: 11px;" onclick="app.addInlineExpenseRow()">+ Add Row</button>
-                </div>
-
-                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                    <input type="hidden" id="active-detail-group-id">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Category</th>
-                                <th>Amount (₹)</th>
-                                <th>Paid By</th>
-                                <th>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody id="inline-sheet-tbody">
-                            <!-- Dynamic Rows -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="flex justify-between items-center pt-2 border-t border-border-color">
-                    <span style="font-size: 14px; font-weight: 800; color: var(--primary);" id="inline-sheet-total">Total: ₹0.00</span>
-                    <button class="btn btn-primary" onclick="app.saveInlineSheetExpenses()">Save Sheet Changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL ADD MEMBER -->
-    <div id="modal-member" class="modal-overlay hidden">
-        <div class="modal-content space-y-4" style="max-width: 400px;">
-            <h3>Add New Member</h3>
-            <form onsubmit="app.saveMember(event)" class="space-y-3">
-                <input type="text" id="mem-name" placeholder="Member Name" required>
-                <input type="email" id="mem-email" placeholder="Email (Optional)">
-                <div class="flex justify-end space-x-2 pt-2">
-                    <button type="button" class="btn btn-secondary" onclick="app.closeAddMemberModal()" data-t="cancel">Cancel</button>
-                    <button type="submit" class="btn btn-primary" data-t="saveExpenseBtn">Add Member</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT APPLICATION LOGIC ENGINE -->
-    <script>
-        const STORAGE_KEY = 'sharespend_pro_v24';
-
-        const QUIZ_QUESTIONS = [
-            {
-                q: "What is the primary benefit of simplified debt optimization in expense splitting?",
-                options: ["It reduces total spend", "It minimizes the total number of transactions needed to settle up", "It eliminates taxes", "It forces equal splits"],
-                ans: 1,
-                explanation: "Debt simplification cancels out cross-debts between members so fewer transfers are needed."
-            },
-            {
-                q: "When splitting a dinner bill where one person drank expensive wine, which split method is fairest?",
-                options: ["Equal Split", "Exact Amounts or Custom Split", "Percentage Split", "Ignore the expense"],
-                ans: 1,
-                explanation: "Exact amounts allow people to pay specifically for what they ordered."
-            }
-        ];
-
-        const INITIAL_STATE = {
-            lang: 'mr',
-            currency: 'INR',
-            symbol: '₹',
-            theme: 'light',
-            profile: { id: 'u_you', name: 'तुम्ही (You)', email: 'you@sharespend.app' },
-            voiceSettings: { option: 'female_mr', voiceURI: '', rate: 0.88, pitch: 1.0 },
-            users: [
-                { id: 'u_you', name: 'तुम्ही (You)' }
-            ],
-            groups: [
-                { id: 'g_goa', name: 'गोवा ट्रिप 🏖️', type: 'Trip', budget: 15000, members: ['u_you'], notes: [] }
-            ],
-            expenses: [],
-            settlements: [],
-            quizIndex: 0,
-            quizScore: 0
-        };
-
-        class ShareSpendPro {
-            constructor() {
-                this.state = this.loadState();
-                this.isRecording = false;
-                this.isContinuousListening = false;
-                this.isSpeaking = false; 
-                this.recognition = null;
-                this.availableVoices = [];
-                
-                this.initBranding();
-                this.initSpeechVoices();
-                this.initSpeechRecognition();
-                this.initTheme();
-                this.syncProfileView();
-                this.applyTranslations();
-
-                // ESCAPE KEY TO EXIT VOICE
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape' && this.isContinuousListening) {
-                        this.stopContinuousVoice(true);
-                    }
-                });
-            }
-
-            loadState() {
-                const s = localStorage.getItem(STORAGE_KEY);
-                return s ? JSON.parse(s) : JSON.parse(JSON.stringify(INITIAL_STATE));
-            }
-
-            saveState() {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(this.state));
-            }
-
-            initBranding() {
-                document.getElementById('html-title').innerText = APP_CONFIG.appName;
-                document.getElementById('brand-name-text').innerText = APP_CONFIG.appName;
-                document.getElementById('brand-sub-text').innerText = APP_CONFIG.appSubTitle;
-                
-                const logoBox = document.getElementById('sidebar-logo-box');
-                if(APP_CONFIG.logoType === 'image' && APP_CONFIG.logoImageURL) {
-                    logoBox.innerHTML = `<img src="${APP_CONFIG.logoImageURL}" onerror="this.outerHTML='${APP_CONFIG.logoContent}'" style="width:100%; height:100%; object-fit:cover; border-radius:12px;">`;
-                } else {
-                    logoBox.innerText = APP_CONFIG.logoContent;
-                }
-            }
-
-            initTheme() {
-                if (this.state.theme === 'dark') document.documentElement.classList.add('dark');
-                else document.documentElement.classList.remove('dark');
-            }
-
-            toggleDarkMode() {
-                this.state.theme = this.state.theme === 'dark' ? 'light' : 'dark';
-                this.saveState();
-                this.initTheme();
-            }
-
-            changeLanguage(lang) {
-                this.state.lang = lang;
-                if (!this.state.voiceSettings) this.state.voiceSettings = {};
-                this.state.voiceSettings.option = lang === 'mr' ? 'female_mr' : 'female_en';
-                this.saveState();
-                this.applyTranslations();
-                this.syncProfileView();
-                
-                document.getElementById('esc-hint-text').innerText = lang === 'mr' ? '(बाहेर पडण्यासाठी ESC दाबा)' : '(Press ESC to Stop & Exit)';
-            }
-
-            applyTranslations() {
-                const lang = this.state.lang || 'mr';
-                const dict = TRANSLATIONS[lang] || TRANSLATIONS['mr'];
-
-                document.getElementById('lang-select').value = lang;
-
-                document.querySelectorAll('[data-t]').forEach(el => {
-                    const key = el.getAttribute('data-t');
-                    if (dict[key]) el.innerText = dict[key];
-                });
-
-                if (dict.descPlaceholder) document.getElementById('exp-desc').placeholder = dict.descPlaceholder;
-                if (dict.amtPlaceholder) document.getElementById('exp-amt').placeholder = dict.amtPlaceholder;
-                if (dict.grpNamePlaceholder) document.getElementById('grp-name').placeholder = dict.grpNamePlaceholder;
-                
-                document.getElementById('esc-hint-text').innerText = lang === 'mr' ? '(बाहेर पडण्यासाठी ESC दाबा)' : '(Press ESC to Stop & Exit)';
-
-                this.renderAll();
-            }
-
-            changeCurrency(c) {
-                this.state.currency = c;
-                this.state.symbol = c === 'INR' ? '₹' : c === 'USD' ? '$' : c === 'EUR' ? '€' : '£';
-                this.saveState();
-                this.renderAll();
-            }
-
-            formatMoney(amt) {
-                return `${this.state.symbol}${Number(amt || 0).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
-            }
-
-            getUser(id) {
-                return this.state.users.find(u => u.id === id) || { name: 'Member' };
-            }
-
-            getGroup(id) {
-                return this.state.groups.find(g => g.id === id) || { name: 'Group', notes: [] };
-            }
-
-            syncProfileView() {
-                const p = this.state.profile || { name: 'You', email: 'you@sharespend.app' };
-                document.getElementById('sidebar-name').innerText = p.name;
-                document.getElementById('sidebar-email').innerText = p.email;
-                document.getElementById('sidebar-avatar').innerText = p.name.slice(0, 2).toUpperCase();
-                document.getElementById('set-name').value = p.name;
-                document.getElementById('set-email').value = p.email;
-                
-                const dict = TRANSLATIONS[this.state.lang || 'mr'];
-                document.getElementById('dash-greeting').innerText = `${dict.welcome}, ${p.name} 👋`;
-
-                if (!this.state.voiceSettings) {
-                    this.state.voiceSettings = { option: 'female_mr', voiceURI: '', rate: 0.88, pitch: 1.0 };
-                }
-                document.getElementById('voice-gender-select').value = this.state.voiceSettings.option || 'female_mr';
-                document.getElementById('voice-rate-slider').value = this.state.voiceSettings.rate || 0.88;
-                document.getElementById('voice-pitch-slider').value = this.state.voiceSettings.pitch || 1.0;
-                document.getElementById('val-rate').innerText = this.state.voiceSettings.rate || 0.88;
-                document.getElementById('val-pitch').innerText = this.state.voiceSettings.pitch || 1.0;
-            }
-
-            saveProfile() {
-                const name = document.getElementById('set-name').value.trim();
-                const email = document.getElementById('set-email').value.trim();
-                if (name) {
-                    this.state.profile.name = name;
-                    const meUser = this.state.users.find(u => u.id === 'u_you');
-                    if (meUser) meUser.name = name;
-                }
-                if (email) this.state.profile.email = email;
-                this.saveState();
-                this.syncProfileView();
-                this.showToast('Profile updated!');
-            }
-
-            navigateTo(v) {
-                document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
-                const target = document.getElementById(`view-${v}`);
-                if (target) target.classList.remove('hidden');
-
-                document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                const btn = document.getElementById(`nav-${v}`);
-                if (btn) btn.classList.add('active');
-
-                const dict = TRANSLATIONS[this.state.lang || 'mr'];
-                document.getElementById('page-title').innerText = dict[v] || v;
-                
-                if (v === 'assistant') {
-                    setTimeout(() => this.startContinuousVoice(), 300);
-                } else if (this.isContinuousListening && v !== 'assistant') {
-                    this.stopContinuousVoice(false);
-                }
-
-                if (v === 'quiz') this.renderQuiz();
-                this.renderAll();
-            }
-
-            goToGroupSheet(gId) {
-                this.navigateTo('groups');
-                setTimeout(() => {
-                    this.openGroupDetailsModal(gId);
-                }, 100);
-            }
-
-            calculateBalances() {
-                const bal = {};
-                this.state.users.forEach(u => bal[u.id] = 0);
-
-                this.state.expenses.forEach(e => {
-                    if (bal[e.paidBy] !== undefined) bal[e.paidBy] += Number(e.amount);
-                    Object.entries(e.splits || {}).forEach(([uId, share]) => {
-                        if (bal[uId] !== undefined) bal[uId] -= Number(share);
-                    });
-                });
-
-                this.state.settlements.forEach(s => {
-                    if (bal[s.payerId] !== undefined) bal[s.payerId] += Number(s.amount);
-                    if (bal[s.payeeId] !== undefined) bal[s.payeeId] -= Number(s.amount);
-                });
-
-                return bal;
-            }
-
-            simplifyDebts(bal) {
-                const debtors = [], creditors = [];
-                Object.entries(bal).forEach(([uId, amt]) => {
-                    const r = Math.round(amt * 100) / 100;
-                    if (r < -0.01) debtors.push({ id: uId, amount: -r });
-                    else if (r > 0.01) creditors.push({ id: uId, amount: r });
-                });
-
-                const txs = [];
-                let i = 0, j = 0;
-                while (i < debtors.length && j < creditors.length) {
-                    const d = debtors[i], c = creditors[j];
-                    const t = Math.min(d.amount, c.amount);
-                    if (t > 0.01) txs.push({ from: d.id, to: c.id, amount: Math.round(t*100)/100 });
-                    d.amount -= t; c.amount -= t;
-                    if (d.amount < 0.01) i++;
-                    if (c.amount < 0.01) j++;
-                }
-                return txs;
-            }
-
-            renderAll() {
-                const bal = this.calculateBalances();
-                const meId = 'u_you';
-                const txs = this.simplifyDebts(bal);
-
-                let owe = 0, owed = 0;
-                txs.forEach(t => {
-                    if (t.from === meId) owe += t.amount;
-                    if (t.to === meId) owed += t.amount;
-                });
-
-                document.getElementById('dash-owe').innerText = this.formatMoney(owe);
-                document.getElementById('dash-owed').innerText = this.formatMoney(owed);
-                
-                const totalSpend = this.state.expenses.reduce((s, e) => s + Number(e.amount), 0);
-                document.getElementById('dash-total').innerText = this.formatMoney(totalSpend);
-
-                const isMr = this.state.lang === 'mr';
-                const dict = TRANSLATIONS[this.state.lang || 'mr'];
-
-                const tripsContainer = document.getElementById('dashboard-trips-overview');
-                tripsContainer.innerHTML = this.state.groups.length === 0 ? `<p style="font-size:12px; color:var(--text-sub);">${isMr ? 'एकही ट्रिप उपलब्ध नाही' : 'No active trips'}</p>` : this.state.groups.map(g => {
-                    const groupExpenses = this.state.expenses.filter(e => e.groupId === g.id);
-                    const groupTotal = groupExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-                    return `
-                        <div class="card space-y-2" style="background:var(--bg-sub); cursor:pointer;" onclick="app.goToGroupSheet('${g.id}')">
-                            <div class="flex justify-between items-center">
-                                <strong style="font-size:14px;">${g.name}</strong>
-                                <span class="badge" style="background:#e0e7ff; color:#4f46e5;">${g.type || 'Trip'}</span>
-                            </div>
-                            <p style="font-size:11px; color:var(--text-sub);">${isMr ? 'एकूण खर्च' : 'Total Spent'}: <strong style="color:var(--text-main);">${this.formatMoney(groupTotal)}</strong> ${g.budget ? `/ ${this.formatMoney(g.budget)}` : ''}</p>
-                            <p style="font-size:11px; color:var(--primary); font-weight:700; margin-top:8px;">${dict.openSheet} ➔</p>
-                        </div>
-                    `;
-                }).join('');
-
-                document.getElementById('debts-list').innerHTML = txs.length === 0 ? `<p style="font-size:12px; color: var(--text-sub);">${isMr ? 'सर्व हिशोब पूर्ण झाला आहे!' : 'All balances settled!'}</p>` : txs.map(t => `
-                    <div style="padding: 12px; border-radius: 12px; background: var(--bg-sub); display: flex; justify-content: space-between; align-items: center; font-size: 12px; cursor: pointer;" onclick="app.openSettleModalFor('${t.from}', '${t.to}', ${t.amount})">
-                        <div><strong>${this.getUser(t.from).name}</strong> ${isMr ? 'ने द्यायचे' : 'owes'} <strong>${this.getUser(t.to).name}</strong></div>
-                        <strong style="color: var(--primary);">${this.formatMoney(t.amount)} 🤝</strong>
-                    </div>
-                `).join('');
-
-                document.getElementById('recent-expenses-list').innerHTML = this.state.expenses.length === 0 ? `<p style="font-size:12px; color: var(--text-sub);">${isMr ? 'अजून कोणताही खर्च नोंदवलेला नाही.' : 'No expenses recorded yet.'}</p>` : this.state.expenses.slice(0, 5).map(e => `
-                    <div style="padding: 12px; border-radius: 12px; background: var(--bg-sub); display: flex; justify-content: space-between; align-items: center; font-size: 12px;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            ${e.imageUrl ? `<img src="${e.imageUrl}" style="width:36px; height:36px; border-radius:8px; object-fit:cover;">` : ''}
-                            <div>
-                                <strong>${e.description}</strong>
-                                <p style="font-size: 10px; color: var(--text-sub);">${this.getGroup(e.groupId).name} • ${isMr ? 'पैसे दिले' : 'Paid by'} ${this.getUser(e.paidBy).name}</p>
-                            </div>
-                        </div>
-                        <strong style="font-size: 14px;">${this.formatMoney(e.amount)}</strong>
-                    </div>
-                `).join('');
-
-                document.getElementById('groups-list').innerHTML = this.state.groups.length === 0 ? `<p style="font-size:12px; color: var(--text-sub);">${isMr ? 'अजून एकही ग्रुप तयार केलेला नाही.' : 'No groups created yet.'}</p>` : this.state.groups.map(g => `
-                    <div class="card space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="badge" style="background:#e0e7ff; color:#4f46e5;">${g.type}</span>
-                            <div class="space-x-1">
-                                <button class="btn btn-secondary" style="padding:2px 6px; font-size:10px;" onclick="app.editGroup('${g.id}')">✏️ Edit</button>
-                                <button class="btn btn-danger" style="padding:2px 6px; font-size:10px;" onclick="app.deleteGroup('${g.id}')">🗑️</button>
-                            </div>
-                        </div>
-                        <h3 style="cursor:pointer; color:var(--text-main);" onclick="app.openGroupDetailsModal('${g.id}')">${g.name}</h3>
-                        <p style="font-size: 11px; color: var(--text-sub);">${g.members.length} ${isMr ? 'सदस्य' : 'members'} ${g.budget ? `• Budget: ${this.formatMoney(g.budget)}` : ''}</p>
-                        <button class="btn btn-primary w-full" style="margin-top: 8px; font-size: 12px; padding: 8px;" onclick="app.openGroupDetailsModal('${g.id}')">${dict.openSheet}</button>
-                    </div>
-                `).join('');
-
-                document.getElementById('all-expenses-list').innerHTML = this.state.expenses.length === 0 ? `<p style="font-size:12px; color: var(--text-sub);">${isMr ? 'हिशोबात एकही खर्च उपलब्ध नाही.' : 'No expenses in ledger.'}</p>` : this.state.expenses.map(e => `
-                    <div class="card flex justify-between items-center" style="padding: 14px;">
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                            ${e.imageUrl ? `<img src="${e.imageUrl}" style="width:40px; height:40px; border-radius:8px; object-fit:cover;">` : ''}
-                            <div>
-                                <strong>${e.description}</strong>
-                                <p style="font-size: 11px; color: var(--text-sub);">${e.category} • ${e.date}</p>
-                            </div>
-                        </div>
-                        <strong style="font-size: 15px;">${this.formatMoney(e.amount)}</strong>
-                    </div>
-                `).join('');
-
-                document.getElementById('members-list').innerHTML = this.state.users.map(u => `
-                    <div class="card flex justify-between items-center">
-                        <div>
-                            <strong>${u.name}</strong>
-                            <p style="font-size: 11px; color: var(--text-sub);">${u.id === 'u_you' ? (isMr ? 'मुख्य खातेधारक' : 'Main Account') : (isMr ? 'ग्रुप सदस्य' : 'Group Member')}</p>
-                        </div>
-                        ${u.id !== 'u_you' ? `<button class="btn btn-danger" style="padding: 4px 8px; font-size: 11px;" onclick="app.removeMember('${u.id}')">${isMr ? 'काढून टाका' : 'Remove'}</button>` : `<span style="font-size: 11px; color: var(--primary); font-weight:700;">${isMr ? 'स्वतः' : 'Self'}</span>`}
-                    </div>
-                `).join('');
-            }
-
-            openGroupDetailsModal(gId) {
-                const g = this.getGroup(gId);
-                if (!g) return;
-                document.getElementById('active-detail-group-id').value = g.id;
-                document.getElementById('grp-detail-modal-title').innerText = `${g.name} — Expenses Sub-Sheet`;
-                
-                this.renderInlineSheetRows(gId);
-                document.getElementById('modal-group-details').classList.remove('hidden');
-            }
-
-            closeGroupDetailsModal() {
-                document.getElementById('modal-group-details').classList.add('hidden');
-            }
-
-            renderInlineSheetRows(gId) {
-                const groupExpenses = this.state.expenses.filter(e => e.groupId === gId);
-                const tbody = document.getElementById('inline-sheet-tbody');
-                tbody.innerHTML = '';
-
-                let total = 0;
-                if (groupExpenses.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--text-sub); padding: 20px;">No expenses yet. Click "+ Add Row" above to start logging.</td></tr>`;
-                } else {
-                    groupExpenses.forEach((e, idx) => {
-                        total += Number(e.amount || 0);
-                        tbody.innerHTML += `
-                            <tr data-eid="${e.id}">
-                                <td><input type="date" class="inline-date" value="${e.date || ''}" style="padding:4px; font-size:11px;"></td>
-                                <td><input type="text" class="inline-desc" value="${e.description}" placeholder="Description" style="padding:4px 8px; min-width:120px;"></td>
-                                <td>
-                                    <select class="inline-cat" style="padding:4px; font-size:11px;">
-                                        <option value="Food" ${e.category==='Food'?'selected':''}>Food / भोजन</option>
-                                        <option value="Transport" ${e.category==='Transport'?'selected':''}>Transport / प्रवास</option>
-                                        <option value="Lodging" ${e.category==='Lodging'?'selected':''}>Lodging / मुक्काम</option>
-                                        <option value="Groceries" ${e.category==='Groceries'?'selected':''}>Groceries / किराणा</option>
-                                        <option value="Others" ${e.category==='Others'?'selected':''}>Others / इतर</option>
-                                    </select>
-                                </td>
-                                <td><input type="number" step="0.01" class="inline-amt" value="${e.amount}" style="padding:4px 8px; width:90px;" oninput="app.updateInlineSheetTotal()"></td>
-                                <td>
-                                    <select class="inline-payer" style="padding:4px; font-size:11px; max-width:100px;">
-                                        ${this.state.users.map(u => `<option value="${u.id}" ${e.paidBy === u.id ? 'selected' : ''}>${u.name}</option>`).join('')}
-                                    </select>
-                                </td>
-                                <td><button class="btn btn-danger" style="padding:4px 8px; font-size:10px;" onclick="app.deleteInlineExpenseRow('${e.id}')">🗑️</button></td>
-                            </tr>
-                        `;
-                    });
-                }
-                document.getElementById('inline-sheet-total').innerText = `Total: ${this.formatMoney(total)}`;
-            }
-
-            addInlineExpenseRow() {
-                const gId = document.getElementById('active-detail-group-id').value;
-                const today = new Date().toISOString().split('T')[0];
-                this.state.expenses.unshift({
-                    id: 'e_' + Date.now(),
-                    groupId: gId,
-                    description: '',
-                    amount: 0,
-                    category: 'Others',
-                    date: today,
-                    paidBy: 'u_you',
-                    splits: { u_you: 0 }
-                });
-                this.renderInlineSheetRows(gId);
-            }
-
-            deleteInlineExpenseRow(eId) {
-                const gId = document.getElementById('active-detail-group-id').value;
-                this.state.expenses = this.state.expenses.filter(e => e.id !== eId);
-                this.renderInlineSheetRows(gId);
-            }
-
-            updateInlineSheetTotal() {
-                let total = 0;
-                document.querySelectorAll('.inline-amt').forEach(inp => {
-                    total += Number(inp.value || 0);
-                });
-                document.getElementById('inline-sheet-total').innerText = `Total: ${this.formatMoney(total)}`;
-            }
-
-            saveInlineSheetExpenses() {
-                const gId = document.getElementById('active-detail-group-id').value;
-                const group = this.getGroup(gId);
-                
-                document.querySelectorAll('#inline-sheet-tbody tr').forEach(tr => {
-                    const eId = tr.dataset.eid;
-                    if (!eId) return;
-                    const date = tr.querySelector('.inline-date').value;
-                    const desc = tr.querySelector('.inline-desc').value.trim();
-                    const cat = tr.querySelector('.inline-cat').value;
-                    const amt = Number(tr.querySelector('.inline-amt').value) || 0;
-                    const paidBy = tr.querySelector('.inline-payer').value;
-
-                    const exp = this.state.expenses.find(e => e.id === eId);
-                    if (exp) {
-                        exp.date = date || new Date().toISOString().split('T')[0];
-                        exp.description = desc || 'Unnamed Expense';
-                        exp.category = cat;
-                        exp.amount = amt;
-                        exp.paidBy = paidBy;
-                        
-                        const perPerson = Math.round((amt / group.members.length) * 100) / 100;
-                        const splits = {};
-                        group.members.forEach(mId => splits[mId] = perPerson);
-                        exp.splits = splits;
-                    }
-                });
-
-                this.saveState();
-                this.closeGroupDetailsModal();
-                this.showToast(this.state.lang === 'mr' ? 'सब-शीट सेव्ह झाली!' : 'Sub-Sheet updated successfully!');
-                this.renderAll();
-            }
-
-            openExpenseModal() {
-                if (this.state.groups.length === 0) return alert(this.state.lang === 'mr' ? 'कृपया आधी एक ग्रुप तयार करा.' : 'Please create a Group first.');
-                const gSel = document.getElementById('exp-group');
-                gSel.innerHTML = this.state.groups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
-                const pSel = document.getElementById('exp-paidby');
-                pSel.innerHTML = this.state.users.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
-                document.getElementById('exp-date').value = new Date().toISOString().split('T')[0];
-                document.getElementById('modal-expense').classList.remove('hidden');
-            }
-
-            closeExpenseModal() { document.getElementById('modal-expense').classList.add('hidden'); }
-
-            saveExpense(e) {
-                e.preventDefault();
-                const groupId = document.getElementById('exp-group').value;
-                const paidBy = document.getElementById('exp-paidby').value;
-                const description = document.getElementById('exp-desc').value;
-                const amount = Number(document.getElementById('exp-amt').value);
-                const category = document.getElementById('exp-cat').value;
-                const date = document.getElementById('exp-date').value;
-                const imgInput = document.getElementById('exp-image');
-
-                const processAndSave = (imageUrl) => {
-                    const group = this.getGroup(groupId);
-                    const perPerson = Math.round((amount / group.members.length) * 100) / 100;
-                    const splits = {};
-                    group.members.forEach(mId => splits[mId] = perPerson);
-
-                    this.state.expenses.unshift({ id: 'e_' + Date.now(), groupId, paidBy, description, amount, category, date, imageUrl, splits });
-                    this.saveState();
-                    this.closeExpenseModal();
-                    this.showToast(this.state.lang === 'mr' ? 'खर्च सेव्ह झाला!' : 'Expense saved!');
-                    this.renderAll();
-                };
-
-                if (imgInput.files && imgInput.files[0]) {
-                    const reader = new FileReader();
-                    reader.onload = function(evt) { processAndSave(evt.target.result); };
-                    reader.readAsDataURL(imgInput.files[0]);
-                } else {
-                    processAndSave('');
-                }
-            }
-
-            openSettleModal() {
-                if (this.state.groups.length === 0) return alert('Create a group first.');
-                const gSel = document.getElementById('settle-group');
-                gSel.innerHTML = this.state.groups.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
-                const pSel = document.getElementById('settle-payer');
-                pSel.innerHTML = this.state.users.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
-                const pySel = document.getElementById('settle-payee');
-                pySel.innerHTML = this.state.users.map(u => `<option value="${u.id}">${u.name}</option>`).join('');
-                document.getElementById('modal-settle').classList.remove('hidden');
-            }
-
-            openSettleModalFor(payerId, payeeId, amt) {
-                this.openSettleModal();
-                document.getElementById('settle-payer').value = payerId;
-                document.getElementById('settle-payee').value = payeeId;
-                document.getElementById('settle-amt').value = amt;
-            }
-
-            closeSettleModal() { document.getElementById('modal-settle').classList.add('hidden'); }
-
-            recordSettlement(e) {
-                e.preventDefault();
-                const groupId = document.getElementById('settle-group').value;
-                const payerId = document.getElementById('settle-payer').value;
-                const payeeId = document.getElementById('settle-payee').value;
-                const amount = Number(document.getElementById('settle-amt').value);
-
-                if (payerId === payeeId) return alert(this.state.lang === 'mr' ? 'देणारा आणि घेणारा एकच व्यक्ती असू शकत नाही.' : 'Payer and Payee cannot be same person.');
-
-                this.state.settlements.unshift({ id: 's_' + Date.now(), groupId, payerId, payeeId, amount, date: new Date().toISOString().split('T')[0] });
-                this.saveState();
-                this.closeSettleModal();
-                this.showToast(this.state.lang === 'mr' ? 'हिशोब पूर्ण सेव्ह झाला!' : 'Settlement recorded!');
-                this.renderAll();
-            }
-
-            openGroupModal() {
-                document.getElementById('grp-edit-id').value = '';
-                document.getElementById('grp-name').value = '';
-                document.getElementById('grp-budget').value = '';
-                const dict = TRANSLATIONS[this.state.lang || 'mr'];
-                document.getElementById('modal-group-header-title').innerText = dict.createGrpTitle;
-                document.getElementById('btn-save-group-submit').innerText = dict.saveGroupBtn;
-
-                const box = document.getElementById('grp-members-checkboxes');
-                box.innerHTML = this.state.users.map(u => `
-                    <label class="checkbox-label">
-                        <input type="checkbox" value="${u.id}" checked> ${u.name}
-                    </label>
-                `).join('');
-                document.getElementById('modal-group').classList.remove('hidden');
-            }
-
-            editGroup(gId) {
-                const g = this.getGroup(gId);
-                if (!g) return;
-
-                document.getElementById('grp-edit-id').value = g.id;
-                document.getElementById('grp-name').value = g.name;
-                document.getElementById('grp-type').value = g.type || 'Trip';
-                document.getElementById('grp-budget').value = g.budget || '';
-
-                const dict = TRANSLATIONS[this.state.lang || 'mr'];
-                document.getElementById('modal-group-header-title').innerText = dict.editGrpTitle;
-                document.getElementById('btn-save-group-submit').innerText = dict.saveGroupBtn;
-
-                const box = document.getElementById('grp-members-checkboxes');
-                box.innerHTML = this.state.users.map(u => `
-                    <label class="checkbox-label">
-                        <input type="checkbox" value="${u.id}" ${g.members.includes(u.id) ? 'checked' : ''}> ${u.name}
-                    </label>
-                `).join('');
-                document.getElementById('modal-group').classList.remove('hidden');
-            }
-
-            deleteGroup(gId) {
-                if (confirm(this.state.lang === 'mr' ? 'तुम्ही हा ग्रुप डिलीट करू इच्छिता का? यातील सर्व खर्च काढले जातील.' : 'Are you sure you want to delete this group? All related expenses will be removed.')) {
-                    this.state.groups = this.state.groups.filter(g => g.id !== gId);
-                    this.state.expenses = this.state.expenses.filter(e => e.groupId !== gId);
-                    this.saveState();
-                    this.renderAll();
-                    this.showToast(this.state.lang === 'mr' ? 'ग्रुप डिलीट झाला' : 'Group deleted');
-                }
-            }
-
-            closeGroupModal() { document.getElementById('modal-group').classList.add('hidden'); }
-
-            saveGroup(e) {
-                e.preventDefault();
-                const editId = document.getElementById('grp-edit-id').value;
-                const name = document.getElementById('grp-name').value;
-                const type = document.getElementById('grp-type').value;
-                const budget = Number(document.getElementById('grp-budget').value) || 0;
-                const checked = Array.from(document.querySelectorAll('#grp-members-checkboxes input:checked')).map(cb => cb.value);
-                
-                if (checked.length === 0) return alert('Please select at least one member');
-
-                if (editId) {
-                    const g = this.getGroup(editId);
-                    if (g) {
-                        g.name = name;
-                        g.type = type;
-                        g.budget = budget;
-                        g.members = checked;
-                    }
-                } else {
-                    this.state.groups.push({ id: 'g_' + Date.now(), name, type, budget, members: checked, notes: [] });
-                }
-
-                this.saveState();
-                this.closeGroupModal();
-                this.showToast(this.state.lang === 'mr' ? 'ग्रुप सेव्ह झाला!' : 'Group saved!');
-                this.renderAll();
-            }
-
-            openAddMemberModal() { document.getElementById('modal-member').classList.remove('hidden'); }
-            closeAddMemberModal() { document.getElementById('modal-member').classList.add('hidden'); }
-
-            saveMember(e) {
-                e.preventDefault();
-                const name = document.getElementById('mem-name').value.trim();
-                if (!name) return;
-
-                this.state.users.push({ id: 'u_' + Date.now(), name });
-                this.saveState();
-                this.closeAddMemberModal();
-                this.showToast(this.state.lang === 'mr' ? 'सदस्य जोडला गेला!' : 'Member added!');
-                this.renderAll();
-            }
-
-            removeMember(id) {
-                if (confirm(this.state.lang === 'mr' ? 'तुम्ही या सदस्याला काढून टाकू इच्छिता का?' : 'Are you sure you want to remove this member?')) {
-                    this.state.users = this.state.users.filter(u => u.id !== id);
-                    this.saveState();
-                    this.renderAll();
-                    this.showToast(this.state.lang === 'mr' ? 'सदस्य काढून टाकला' : 'Member removed');
-                }
-            }
-
-            /* ================= HIGH-QUALITY DYNAMIC SPEECH ENGINE ================= */
-            initSpeechVoices() {
-                if ('speechSynthesis' in window) {
-                    const populateVoices = () => {
-                        this.availableVoices = window.speechSynthesis.getVoices();
-                        const voiceSelect = document.getElementById('voice-system-select');
-                        if (voiceSelect) {
-                            voiceSelect.innerHTML = '<option value="">Auto-Select Natural Voice</option>';
-                            this.availableVoices.forEach(v => {
-                                voiceSelect.innerHTML += `<option value="${v.voiceURI}">${v.name} (${v.lang})</option>`;
-                            });
-                            if (this.state.voiceSettings && this.state.voiceSettings.voiceURI) {
-                                voiceSelect.value = this.state.voiceSettings.voiceURI;
-                            }
-                        }
-                    };
-
-                    populateVoices();
-                    if (speechSynthesis.onvoiceschanged !== undefined) {
-                        speechSynthesis.onvoiceschanged = populateVoices;
-                    }
-                }
-            }
-
-            updateVoiceSettings() {
-                const option = document.getElementById('voice-gender-select').value;
-                const voiceURI = document.getElementById('voice-system-select').value;
-                const rate = parseFloat(document.getElementById('voice-rate-slider').value);
-                const pitch = parseFloat(document.getElementById('voice-pitch-slider').value);
-
-                this.state.voiceSettings = { option, voiceURI, rate, pitch };
-                this.saveState();
-            }
-
-            testVoiceSettings() {
-                this.updateVoiceSettings();
-                const isMr = this.state.voiceSettings.option.includes('_mr') || this.state.lang === 'mr';
-                const testMsg = isMr ? "नमस्कार! ही तुमच्या अ‍ॅपमधील स्पष्ट आणि नैसर्गिक मराठी आवाजाची टेस्ट आहे." : "Hello! This is a test of your selected natural voice settings.";
-                this.speakAssistantResponse(testMsg);
-            }
-
-            // ROBUST CONTINUOUS LISTENING ENGINE WITH ERROR HANDLING
-            initSpeechRecognition() {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (SpeechRecognition) {
-                    this.recognition = new SpeechRecognition();
-                    this.recognition.continuous = false; 
-                    
-                    this.recognition.onstart = () => {
-                        document.getElementById('mic-status-btn').classList.add('pulse-mic');
-                        document.getElementById('voice-status-text').innerText = this.state.lang === 'mr' ? 'ऐकत आहे... (थांबवण्यासाठी ESC दाबा)' : 'Listening... (Press ESC to stop)';
-                    };
-
-                    this.recognition.onerror = (event) => {
-                        if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
-                            this.isContinuousListening = false;
-                            document.getElementById('mic-status-btn').classList.remove('pulse-mic');
-                            document.getElementById('voice-status-text').innerText = TRANSLATIONS[this.state.lang || 'mr'].speakMic;
-                            alert(this.state.lang === 'mr' ? 'मायक्रोफोनला परवानगी दिलेली नाही. कृपया ब्राउझर सेटिंग्ज तपासा.' : 'Microphone access denied. Please allow it in browser settings.');
-                        }
-                    };
-
-                    this.recognition.onresult = (event) => {
-                        const transcript = event.results[0][0].transcript;
-                        this.processVoiceText(transcript);
-                    };
-
-                    this.recognition.onend = () => {
-                        if (this.isContinuousListening && !this.isSpeaking) {
-                            setTimeout(() => {
-                                if (this.isContinuousListening && !this.isSpeaking) {
-                                    try { this.recognition.start(); } catch(e) {}
-                                }
-                            }, 800); 
-                        } else if (!this.isContinuousListening) {
-                            document.getElementById('mic-status-btn').classList.remove('pulse-mic');
-                            document.getElementById('voice-status-text').innerText = TRANSLATIONS[this.state.lang || 'mr'].speakMic;
-                        }
-                    };
-                }
-            }
-
-            startContinuousVoice() {
-                if (!this.recognition) return alert('Speech recognition is not supported in this browser.');
-                this.isContinuousListening = true;
-                this.isSpeaking = false;
-                const currentLang = this.state.lang || 'mr';
-                this.recognition.lang = currentLang === 'mr' ? 'mr-IN' : 'en-US';
-                try { this.recognition.start(); } catch(e) {}
-            }
-
-            stopContinuousVoice(redirect = true) {
-                this.isContinuousListening = false;
-                this.isSpeaking = false;
-                try { this.recognition.stop(); } catch(e) {}
-                document.getElementById('mic-status-btn').classList.remove('pulse-mic');
-                document.getElementById('voice-status-text').innerText = TRANSLATIONS[this.state.lang || 'mr'].speakMic;
-                
-                if (redirect) {
-                    this.navigateTo('dashboard');
-                    this.showToast(this.state.lang === 'mr' ? 'व्हॉइस असिस्टंट बंद झाला' : 'Voice Assistant Closed');
-                }
-            }
-
-            toggleVoiceRecording() {
-                if (this.isContinuousListening) {
-                    this.stopContinuousVoice(false);
-                } else {
-                    this.startContinuousVoice();
-                }
-            }
-
-            // DYNAMIC NLP ENGINE FOR FULL APP INTERACTION
-            processVoiceText(txt) {
-                document.getElementById('assistant-transcript').innerText = `"${txt}"`;
-                let responseText = "";
-                const isMr = this.state.lang === 'mr';
-                const lowerTxt = txt.toLowerCase();
-
-                // 1. Navigation Extraction (Voice Navigation)
-                if (lowerTxt.match(/dashboard|डॅशबोर्ड|होम|home/)) {
-                    this.navigateTo('dashboard');
-                    responseText = isMr ? "डॅशबोर्ड उघडत आहे." : "Opening dashboard.";
-                    document.getElementById('assistant-response').innerText = responseText;
-                    return this.speakAssistantResponse(responseText);
-                } else if (lowerTxt.match(/groups|trips|ग्रुप्स|ट्रिप्स|टूर/)) {
-                    this.navigateTo('groups');
-                    responseText = isMr ? "तुमचे ग्रुप्स आणि ट्रिप्स उघडत आहे." : "Opening your groups and trips.";
-                    document.getElementById('assistant-response').innerText = responseText;
-                    return this.speakAssistantResponse(responseText);
-                } else if (lowerTxt.match(/expenses|history|ledger|इतिहास|नोंदी/)) {
-                    this.navigateTo('expenses');
-                    responseText = isMr ? "खर्चाचा इतिहास उघडत आहे." : "Opening expense history.";
-                    document.getElementById('assistant-response').innerText = responseText;
-                    return this.speakAssistantResponse(responseText);
-                } else if (lowerTxt.match(/settings|profile|सेटिंग्ज|प्रोफाइल/)) {
-                    this.navigateTo('settings');
-                    responseText = isMr ? "सेटिंग्ज उघडत आहे." : "Opening settings.";
-                    document.getElementById('assistant-response').innerText = responseText;
-                    return this.speakAssistantResponse(responseText);
-                } else if (lowerTxt.match(/members|friends|मित्र|सदस्य/)) {
-                    this.navigateTo('members');
-                    responseText = isMr ? "सदस्य व्यवस्थापन उघडत आहे." : "Opening members management.";
-                    document.getElementById('assistant-response').innerText = responseText;
-                    return this.speakAssistantResponse(responseText);
-                }
-
-                // 2. Entity Extraction
-                const matchedGroup = this.state.groups.find(g => lowerTxt.includes(g.name.toLowerCase()) || (g.name.split(' ')[0] && lowerTxt.includes(g.name.split(' ')[0].toLowerCase())));
-                const matchedUser = this.state.users.find(u => u.id !== 'u_you' && lowerTxt.includes(u.name.toLowerCase()));
-                
-                const categories = {
-                    'Food': ['food', 'dining', 'भोजन', 'जेवण', 'खाद्य', 'खाण्या', 'नाश्ता', 'हॉटेल'],
-                    'Transport': ['transport', 'cab', 'travel', 'प्रवास', 'गाडी', 'कॅब', 'टॅक्सी', 'पेट्रोल'],
-                    'Lodging': ['lodging', 'hotel', 'हॉटेल', 'मुक्काम', 'राहणे', 'रूम', 'लॉज'],
-                    'Groceries': ['groceries', 'किराणा', 'सामान', 'माल']
-                };
-                let matchedCategory = null;
-                for (const [cat, keywords] of Object.entries(categories)) {
-                    if (keywords.some(k => lowerTxt.includes(k))) matchedCategory = cat;
-                }
-
-                // --- AI Logic Branching ---
-
-                if (matchedUser) {
-                    const userPaid = this.state.expenses.filter(e => e.paidBy === matchedUser.id).reduce((s, e) => s + Number(e.amount), 0);
-                    responseText = isMr ? `${matchedUser.name} ने आतापर्यंत ${this.formatMoney(userPaid)} रुपये दिले आहेत.` : `${matchedUser.name} has paid ${this.formatMoney(userPaid)} so far.`;
-                }
-                else if (matchedCategory) {
-                    const catExpenses = this.state.expenses.filter(e => e.category === matchedCategory);
-                    const total = catExpenses.reduce((s, e) => s + e.amount, 0);
-                    const catNameMr = matchedCategory === 'Food' ? 'जेवणावर' : matchedCategory === 'Transport' ? 'प्रवासावर' : matchedCategory === 'Lodging' ? 'राहण्यावर' : 'किराणा मालावर';
-                    if (total > 0) {
-                        responseText = isMr ? `तुमचा ${catNameMr} एकूण खर्च ${this.formatMoney(total)} आहे.` : `Your total spend on ${matchedCategory} is ${this.formatMoney(total)}.`;
-                    } else {
-                        responseText = isMr ? `तुम्ही ${catNameMr} अजून काहीही खर्च केलेला नाही.` : `You haven't spent anything on ${matchedCategory} yet.`;
-                    }
-                }
-                else if (matchedGroup || lowerTxt.match(/summarize|summary|सारांश|माहिती|ट्रिप/)) {
-                    const targetGroup = matchedGroup || this.state.groups[this.state.groups.length - 1]; 
-                    if (!targetGroup) {
-                        responseText = isMr ? "कोणतीही ट्रिप उपलब्ध नाही." : "No trips available to summarize.";
-                    } else {
-                        const grpExp = this.state.expenses.filter(e => e.groupId === targetGroup.id);
-                        const grpTotal = grpExp.reduce((s, e) => s + e.amount, 0);
-                        responseText = isMr ? `${targetGroup.name} मध्ये आतापर्यंत एकूण ${this.formatMoney(grpTotal)} खर्च झाला आहे. त्यात ${grpExp.length} नोंदी आहेत.` : `The total spend for ${targetGroup.name} is ${this.formatMoney(grpTotal)} across ${grpExp.length} expenses.`;
-                    }
-                }
-                else if (lowerTxt.match(/owes|owe|बाकी|देणे|येणे|उधार|कर्ज|द्यायचे|घ्यायचे|कोणाचे|कोणाला/)) {
-                    const bal = this.calculateBalances();
-                    const txs = this.simplifyDebts(bal);
-                    const meId = 'u_you';
-                    
-                    if (lowerTxt.match(/i owe|मी देणे|माझी बाकी|मला द्यायचे|मला कोणाला/)) {
-                        const oweList = txs.filter(t => t.from === meId);
-                        if (oweList.length === 0) responseText = isMr ? "तुम्हाला कोणालाही पैसे द्यायचे नाहीत. तुम्ही क्लिअर आहात!" : "You don't owe anyone money. You are clear!";
-                        else responseText = isMr ? `तुम्हाला ${oweList.map(t => `${this.getUser(t.to).name} ला ${this.formatMoney(t.amount)}`).join(', ')} द्यायचे आहेत.` : `You owe ${oweList.map(t => `${this.getUser(t.to).name} ${this.formatMoney(t.amount)}`).join(', ')}.`;
-                    } else {
-                        const owedList = txs.filter(t => t.to === meId);
-                        if (owedList.length === 0) responseText = isMr ? "सध्या तुमच्याकडे कोणाचेही पैसे बाकी नाहीत." : "No one owes you money currently.";
-                        else responseText = isMr ? `तुमच्याकडे येणे रक्कम: ${owedList.map(t => `${this.getUser(t.from).name} कडून ${this.formatMoney(t.amount)}`).join(', ')}` : `Here is who owes you: ${owedList.map(t => `${this.getUser(t.from).name} owes ${this.formatMoney(t.amount)}`).join(', ')}.`;
-                    }
-                }
-                else if (lowerTxt.match(/spend|total|खर्च|एकूण|बिल/)) {
-                    const total = this.state.expenses.reduce((s, e) => s + Number(e.amount), 0);
-                    responseText = isMr ? `तुमचा आजपर्यंतचा एकूण नोंदवलेला खर्च ${this.formatMoney(total)} इतका आहे.` : `Your total recorded spending is ${this.formatMoney(total)}.`;
-                }
-                else {
-                    const total = this.state.expenses.reduce((s, e) => s + Number(e.amount), 0);
-                    const bal = this.calculateBalances();
-                    const txs = this.simplifyDebts(bal);
-                    const owedList = txs.filter(t => t.to === 'u_you');
-                    let owedTotal = owedList.reduce((s, t) => s + t.amount, 0);
-
-                    responseText = isMr 
-                        ? `तुम्ही म्हणालात "${txt}". मला नक्की प्रश्न समजला नाही. पण माहितीसाठी, तुमचा एकूण खर्च ${this.formatMoney(total)} आहे आणि येणे रक्कम ${this.formatMoney(owedTotal)} आहे.` 
-                        : `You said "${txt}". I didn't get the question. But your total spend is ${this.formatMoney(total)} and owed amount is ${this.formatMoney(owedTotal)}.`;
-                }
-
-                document.getElementById('assistant-response').innerText = responseText;
-                this.speakAssistantResponse(responseText);
-            }
-
-            speakAssistantResponse(text) {
-                this.isSpeaking = true;
-                if (this.isContinuousListening) {
-                    try { this.recognition.stop(); } catch(e) {}
-                }
-
-                const msg = text || document.getElementById('assistant-response').innerText;
-                if ('speechSynthesis' in window) {
-                    window.speechSynthesis.cancel();
-
-                    const utterance = new SpeechSynthesisUtterance(msg);
-                    const settings = this.state.voiceSettings || { option: 'female_mr', rate: 0.88, pitch: 1.0 };
-
-                    utterance.rate = settings.rate || 0.88;
-                    utterance.pitch = settings.pitch || 1.0;
-
-                    const option = settings.option || 'female_mr';
-                    const isMale = option.startsWith('male');
-                    const isMarathi = option.endsWith('mr') || (this.state.lang === 'mr');
-
-                    utterance.lang = isMarathi ? 'mr-IN' : 'en-US';
-
-                    if (this.availableVoices.length > 0) {
-                        let selectedVoice = null;
-                        if (settings.voiceURI) {
-                            selectedVoice = this.availableVoices.find(v => v.voiceURI === settings.voiceURI);
-                        }
-
-                        if (!selectedVoice) {
-                            let possibleVoices = this.availableVoices;
-                            
-                            if (isMarathi) {
-                                possibleVoices = this.availableVoices.filter(v => 
-                                    v.lang.toLowerCase().includes('mr') || 
-                                    v.lang.toLowerCase().includes('hi')
-                                ); 
-                            } else {
-                                possibleVoices = this.availableVoices.filter(v => v.lang.toLowerCase().includes('en'));
-                            }
-
-                            selectedVoice = possibleVoices.find(v => {
-                                const vName = v.name.toLowerCase();
-                                return isMale ? (vName.includes('male') || vName.includes('david') || vName.includes('rishi') || vName.includes('madhav') || vName.includes('hemant'))
-                                              : (vName.includes('female') || vName.includes('zira') || vName.includes('samantha') || vName.includes('shruti') || vName.includes('aditi') || vName.includes('kalpana') || vName.includes('lekha'));
-                            });
-
-                            if (!selectedVoice && possibleVoices.length > 0) {
-                                selectedVoice = possibleVoices[0]; 
-                            }
-                        }
-
-                        if (selectedVoice) utterance.voice = selectedVoice;
-                    }
-
-                    utterance.onend = () => {
-                        this.isSpeaking = false;
-                        if (this.isContinuousListening && document.getElementById('view-assistant').classList.contains('hidden') === false) {
-                            setTimeout(() => {
-                                if (this.isContinuousListening && !this.isSpeaking) {
-                                    try { this.recognition.start(); } catch(e) {}
-                                }
-                            }, 500);
-                        }
-                    };
-
-                    window.speechSynthesis.speak(utterance);
-                }
-            }
-
-            renderQuiz() {
-                const q = QUIZ_QUESTIONS[this.state.quizIndex || 0];
-                const container = document.getElementById('quiz-card-container');
-                document.getElementById('quiz-score-badge').innerText = `Score: ${this.state.quizScore || 0} / ${QUIZ_QUESTIONS.length}`;
-
-                if (!q) {
-                    container.innerHTML = `<div class="text-center space-y-4"><h3>🎉 Quiz Completed!</h3><button class="btn btn-primary" onclick="app.resetQuiz()">Restart</button></div>`;
-                    return;
-                }
-
-                container.innerHTML = `
-                    <div class="space-y-4">
-                        <span style="font-size: 11px; font-weight: 700; color: var(--primary);">QUESTION ${(this.state.quizIndex||0) + 1} OF ${QUIZ_QUESTIONS.length}</span>
-                        <h3 style="font-size: 16px; font-weight: 700;">${q.q}</h3>
-                        <div class="space-y-2">
-                            ${q.options.map((opt, i) => `<button class="btn btn-secondary w-full text-left" style="justify-content: flex-start; padding: 12px;" onclick="app.handleQuizAnswer(${i})">${opt}</button>`).join('')}
-                        </div>
-                    </div>
-                `;
-            }
-
-            handleQuizAnswer(idx) {
-                const q = QUIZ_QUESTIONS[this.state.quizIndex || 0];
-                if (idx === q.ans) {
-                    this.state.quizScore = (this.state.quizScore || 0) + 1;
-                    alert('✨ Correct!');
-                } else {
-                    alert('❌ Incorrect.');
-                }
-                this.state.quizIndex = (this.state.quizIndex || 0) + 1;
-                this.saveState();
-                this.renderQuiz();
-            }
-
-            resetQuiz() {
-                this.state.quizIndex = 0;
-                this.state.quizScore = 0;
-                this.saveState();
-                this.renderQuiz();
-            }
-
-            exportCSV() {
-                if (this.state.expenses.length === 0) return alert('No expenses to export.');
-                const csv = 'Date,Description,Category,Amount\n' + this.state.expenses.map(e => `${e.date},"${e.description}",${e.category},${e.amount}`).join('\n');
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const a = document.createElement('a');
-                a.href = URL.createObjectURL(blob);
-                a.download = 'ShareSpend_Ledger.csv';
-                a.click();
-            }
-
-            importCSV(evt) {
-                const file = evt.target.files[0];
-                if (!file) return;
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const lines = e.target.result.split('\n');
-                    let count = 0;
-                    const group = this.state.groups[0] || { id: 'g_goa' };
-
-                    for (let i = 1; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if (!line) continue;
-                        const parts = line.split(',');
-                        if (parts.length >= 4) {
-                            const date = parts[0].replace(/"/g, '').trim();
-                            const description = parts[1].replace(/"/g, '').trim();
-                            const category = parts[2].replace(/"/g, '').trim();
-                            const amount = Number(parts[3].replace(/"/g, '').trim()) || 0;
-
-                            const perPerson = Math.round((amount / group.members.length) * 100) / 100;
-                            const splits = {};
-                            group.members.forEach(mId => splits[mId] = perPerson);
-
-                            this.state.expenses.unshift({
-                                id: 'e_' + Date.now() + '_' + i,
-                                groupId: group.id,
-                                paidBy: 'u_you',
-                                description,
-                                amount,
-                                category,
-                                date: date || new Date().toISOString().split('T')[0],
-                                splits
-                            });
-                            count++;
-                        }
-                    }
-                    this.saveState();
-                    this.renderAll();
-                    this.showToast(this.state.lang === 'mr' ? `${count} खर्चाच्या नोंदी आयात झाल्या!` : `Imported ${count} expenses!`);
-                };
-                reader.readAsText(file);
-            }
-
-            resetAllData() {
-                if (confirm('Are you sure you want to clear all data and start fresh?')) {
-                    localStorage.removeItem(STORAGE_KEY);
-                    this.state = JSON.parse(JSON.stringify(INITIAL_STATE));
-                    this.saveState();
-                    this.syncProfileView();
-                    this.applyTranslations();
-                    this.showToast('Data reset complete');
-                }
-            }
-
-            showToast(msg) {
-                const t = document.createElement('div');
-                t.className = 'toast';
-                t.innerText = msg;
-                document.body.appendChild(t);
-                setTimeout(() => t.remove(), 2500);
+        const txt = isMr ? 
+            `<strong>${this.getUser(t.from).name}</strong> ने <strong>${this.getUser(t.to).name}</strong> ला द्यायचे: <strong style="color:var(--danger)">${this.formatMoney(t.amount)}</strong>` : 
+            `<strong>${this.getUser(t.from).name}</strong> owes <strong>${this.getUser(t.to).name}</strong>: <strong style="color:var(--danger)">${this.formatMoney(t.amount)}</strong>`;
+
+        debtsHTML += `<div style="padding:12px;background:var(--bg-sub);border-radius:8px;font-size:12px;border-left:3px solid var(--primary)">
+            <span style="font-size:10px;font-weight:800;color:var(--primary);text-transform:uppercase;display:block;margin-bottom:4px;">🏕️ ${g.name}</span>
+            ${txt}
+        </div>`;
+    });
+});
+
+if (!debtsHTML) debtsHTML = `<p style="font-size:12px;color:var(--text-sub)">${isMr?'कोणतीही बाकी नाही.':'No pending debts.'}</p>`;
+document.getElementById('debts-list').innerHTML = debtsHTML;
+
+document.getElementById('dash-owe').innerText = this.formatMoney(globalOwe);
+document.getElementById('dash-owed').innerText = this.formatMoney(globalOwed);
+document.getElementById('dash-total').innerText = this.formatMoney(this.state.expenses.reduce((s, e) => s + Number(e.amount), 0));
+
+document.getElementById('dashboard-trips-overview').innerHTML = this.state.groups.map(g => {
+    const total = this.state.expenses.filter(e => e.groupId === g.id).reduce((s, e) => s + Number(e.amount), 0);
+    return `<div class="card space-y-2" style="background:var(--bg-sub);cursor:pointer" onclick="app.openGroupDetailsModal('${g.id}')"><strong style="font-size:14px">${g.name}</strong><p style="font-size:11px">Spent: <strong>${this.formatMoney(total)}</strong> / ${this.formatMoney(g.budget)}</p></div>`;
+}).join('');
+
+document.getElementById('groups-list').innerHTML = this.state.groups.map(g => `<div class="card space-y-3"><div class="flex justify-between items-center"><strong>${g.name}</strong><div class="space-x-1"><button class="btn btn-secondary" style="padding:4px 8px;font-size:10px" onclick="app.editGroup('${g.id}')">✏️</button><button class="btn btn-danger" style="padding:4px 8px;font-size:10px" onclick="app.deleteGroup('${g.id}')">🗑️</button></div></div><p style="font-size:11px">Budget: ${this.formatMoney(g.budget)} | Members: ${g.members.length}</p><button class="btn btn-primary w-full" style="padding:6px;font-size:11px" onclick="app.openGroupDetailsModal('${g.id}')">Open ➔</button></div>`).join('');
+
+document.getElementById('all-expenses-list').innerHTML = this.state.expenses.map(e => `<div class="card flex justify-between"><div><strong>${e.description}</strong><p style="font-size:11px">${e.date} • ${this.getGroup(e.groupId).name}</p></div><strong>${this.formatMoney(e.amount)}</strong></div>`).join('');
+
+document.getElementById('members-list').innerHTML = this.state.users.map(u => {
+    const uBal = globalBal[u.id] || 0;
+    let bStr = '';
+    if(uBal > 0.01) bStr = `<span style="color:var(--primary);font-weight:700;font-size:11px">${isMr?'एकूण येणे':'Total gets back'}: ${this.formatMoney(uBal)}</span>`;
+    else if(uBal < -0.01) bStr = `<span style="color:var(--danger);font-weight:700;font-size:11px">${isMr?'एकूण देणे':'Total owes'}: ${this.formatMoney(Math.abs(uBal))}</span>`;
+    else bStr = `<span style="color:var(--text-sub);font-weight:700;font-size:11px">${isMr?'हिशोब पूर्ण':'Settled up'}</span>`;
+
+    return `<div class="card space-y-2"><div class="flex justify-between items-center"><div><strong>${u.name}</strong>${u.phone ? `<p style="font-size:10px;color:var(--text-sub)">📞 ${u.phone}</p>` : ''}${u.email ? `<p style="font-size:10px;color:var(--text-sub)">📧 ${u.email}</p>` : ''}</div>${u.id !== 'u_you' ? `<div class="space-x-1"><button class="btn btn-secondary" style="padding:4px 8px;font-size:10px" onclick="app.editMember('${u.id}')">✏️</button><button class="btn btn-danger" style="padding:4px 8px;font-size:10px" onclick="app.deleteMember('${u.id}')">🗑️</button></div>` : `<span style="font-size:11px;color:var(--primary);font-weight:700">Self</span>`}</div><div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--border-color)">${bStr}</div></div>`;
+}).join('');
+
+document.getElementById('bin-groups-list').innerHTML = this.state.bin.groups.length === 0 ? `<p style="font-size:12px;color:var(--text-sub)">No deleted groups</p>` : this.state.bin.groups.map(g => `<div class="card space-y-2" style="background:#fee2e2;border-color:#fca5a5"><strong>${g.name}</strong><button class="btn btn-secondary w-full" style="font-size:11px;padding:6px" onclick="app.restoreGroup('${g.id}')">↩️ Restore</button></div>`).join('');
+document.getElementById('bin-members-list').innerHTML = this.state.bin.users.length === 0 ? `<p style="font-size:12px;color:var(--text-sub)">No deleted members</p>` : this.state.bin.users.map(u => `<div class="card flex justify-between items-center" style="background:#fee2e2;border-color:#fca5a5;padding:12px"><strong>${u.name}</strong><button class="btn btn-secondary" style="font-size:10px;padding:4px 8px" onclick="app.restoreMember('${u.id}')">↩️ Restore</button></div>`).join('');
+
+// Populate AI Context Dropdown dynamically
+const aiContextGroup = document.getElementById('ai-context-group');
+if(aiContextGroup) {
+    const currentVal = aiContextGroup.value;
+    let contextOptions = `<option value="ALL">${isMr?'सर्व ट्रिप्स':'All Trips'}</option>`;
+    this.state.groups.forEach(g => {
+        contextOptions += `<option value="${g.id}">${g.name}</option>`;
+    });
+    aiContextGroup.innerHTML = contextOptions;
+    if(this.state.groups.find(g => g.id === currentVal)) aiContextGroup.value = currentVal;
+    else aiContextGroup.value = 'ALL';
+}
+
+}
+
+// ==================== SMART FRONTEND VOICE ENGINE ====================
+initSpeechSynthesis(){
+if('speechSynthesis' in window){
+const set=()=>{this.availableVoices=window.speechSynthesis.getVoices()||[]};
+set();window.speechSynthesis.onvoiceschanged=set;
+}
+}
+changeAgent(val){
+this.state.voicePersona=val;this.saveState();
+document.getElementById('voice-persona-select').value=val;
+document.getElementById('assistant-agent-select').value=val;
+this.testVoice();
+}
+testVoice(){
+const isMale=(this.state.voicePersona||'').endsWith('_male');
+const isMr=(this.state.voicePersona||'').includes('mr');
+const msg=isMr?'नमस्कार, मी तुमची शेअरस्पेंड असिस्टंट आहे':(isMale?'Hello, I am your ShareSpend voice assistant':'Hello, I am your ShareSpend voice assistant');
+this.speakAssistantResponse(msg, isMr);
+}
+
+speakAssistantResponse(text, targetIsMr){
+this.isSpeaking=true;
+if(this.isContinuousListening&&this.recognition){try{this.recognition.stop()}catch(e){}}
+let clean=(text||'').replace(/[!?#_.,*()\-]/g,' ').replace(/\s+/g,' ').trim();
+if(!clean||!('speechSynthesis' in window)){this.isSpeaking=false;return}
+window.speechSynthesis.cancel();
+
+setTimeout(()=>{
+this.currentUtterance=new SpeechSynthesisUtterance(clean);
+this.currentUtterance.rate=0.92;
+const persona=this.state.voicePersona||'mr_female';
+
+const isMale=persona.endsWith('_male');
+const isMr = targetIsMr !== undefined ? targetIsMr : persona.includes('mr');
+
+this.currentUtterance.lang=isMr?'mr-IN':'en-US';
+
+if(this.availableVoices.length){
+    let selected = null;
+    
+    if(isMr){
+        let femaleVoices = this.availableVoices.filter(v => {
+            const n = v.name.toLowerCase();
+            const l = v.lang.toLowerCase();
+            return (l.includes('mr') || l.includes('hi')) && (n.includes('female') || n.includes('swara') || n.includes('lekha') || n.includes('shruti') || n.includes('aditi') || n.includes('kalpana'));
+        });
+        if(femaleVoices.length) selected = femaleVoices[0];
+        
+        if(!selected) {
+            selected = this.availableVoices.find(v => v.lang.toLowerCase().includes('in') && v.name.toLowerCase().includes('female'));
+        }
+    } else {
+        let enVoices = this.availableVoices.filter(v => v.lang.toLowerCase().startsWith('en'));
+        if(enVoices.length) {
+            selected = enVoices.find(v => {
+                const n = v.name.toLowerCase();
+                if(isMale) return (n.includes('male') && !n.includes('female')) || n.includes('david') || n.includes('daniel') || n.includes('george');
+                else return n.includes('female') || n.includes('zira') || n.includes('samantha') || n.includes('susan');
+            });
+            if(!selected) selected = enVoices[0];
+        }
+    }
+    
+    if(!selected) selected = this.availableVoices[0];
+
+    this.currentUtterance.voice=selected;
+    this.currentUtterance.lang=selected.lang;
+}
+
+this.currentUtterance.onend=()=>{
+this.isSpeaking=false;
+if(this.isContinuousListening&&this.recognition){
+setTimeout(()=>{if(this.isContinuousListening&&!this.isSpeaking){try{this.recognition.start()}catch(e){}}},400);
+}
+};
+this.currentUtterance.onerror=()=>{this.isSpeaking=false};
+window.speechSynthesis.speak(this.currentUtterance);
+},50);
+}
+
+initSpeechRecognition(){
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+if(!SR){this.recognition=null;return}
+this.recognition=new SR();
+this.recognition.continuous=true;
+this.recognition.interimResults=false;
+this.recognition.maxAlternatives=1;
+this.recognition.onstart=()=>{
+document.querySelector('.fab-ai')?.classList.add('pulse-mic');
+document.getElementById('mic-status-btn')?.classList.add('pulse-mic');
+document.getElementById('voice-status-text').innerText=this.state.lang==='mr'?'ऐकत आहे... (आता बोला)':'Listening... (Speak Now)';
+};
+this.recognition.onresult=e=>{
+const last=e.results[e.results.length-1];
+if(last&&last[0]){const t=last[0].transcript.trim();if(t)this.processVoiceText(t)}
+};
+this.recognition.onend=()=>{
+document.querySelector('.fab-ai')?.classList.remove('pulse-mic');
+document.getElementById('mic-status-btn')?.classList.remove('pulse-mic');
+if(this.isContinuousListening&&!this.isSpeaking){
+setTimeout(()=>{if(this.isContinuousListening&&!this.isSpeaking){try{this.recognition.start()}catch(e){}}},300);
+}else{
+document.getElementById('voice-status-text').innerText=this.state.lang==='mr'?'माइक बंद':'Mic off';
+}
+};
+this.recognition.onerror=e=>{
+this.isContinuousListening=false;
+document.querySelector('.fab-ai')?.classList.remove('pulse-mic');
+document.getElementById('mic-status-btn')?.classList.remove('pulse-mic');
+const map={'not-allowed':this.state.lang==='mr'?'माइक परवानगी नाकारली. Chrome मध्ये Allow करा.':'Mic permission denied. Allow in Chrome.','no-speech':this.state.lang==='mr'?'काही ऐकू आले नाही':'No speech detected','network':this.state.lang==='mr'?'नेटवर्क त्रुटी':'Network error','audio-capture':this.state.lang==='mr'?'माइक सापडला नाही':'No microphone found'};
+if(map[e.error])this.showToast(map[e.error]);
+};
+}
+
+toggleVoiceRecording(){
+if(!this.recognition){this.showToast(this.state.lang==='mr'?'या ब्राउझरमध्ये व्हॉइस सपोर्ट नाही. Chrome वापरा.':'Speech recognition not supported. Use Chrome.');return}
+if(this.isContinuousListening){
+this.isContinuousListening=false;try{this.recognition.stop()}catch(e){}
+document.querySelector('.fab-ai')?.classList.remove('pulse-mic');
+document.getElementById('mic-status-btn')?.classList.remove('pulse-mic');
+document.getElementById('voice-status-text').innerText=this.state.lang==='mr'?'माइक बंद':'Mic off';
+return;
+}
+this.isContinuousListening=true;
+this.recognition.lang = (this.state.voicePersona||'').includes('mr') ? 'mr-IN' : 'en-US';
+try{this.recognition.start()}catch(e){this.isContinuousListening=false;this.showToast(this.state.lang==='mr'?'माइक सुरू करता आला नाही':'Could not start microphone')}
+}
+
+submitAiText(){
+const el=document.getElementById('ai-text-input');const val=el.value.trim();
+if(val){el.blur();this.processVoiceText(val);el.value=''}
+}
+
+getCurrencyWord(cur,isMr){if(cur==='INR')return isMr?'रुपये':'Rupees';if(cur==='USD')return isMr?'डॉलर्स':'Dollars';if(cur==='EUR')return isMr?'युरो':'Euros';if(cur==='GBP')return isMr?'पाउंड्स':'Pounds';return isMr?'रुपये':'Rupees'}
+
+processVoiceText(txt){
+document.getElementById('assistant-transcript').innerText=`"${txt}"`;
+let response='';
+const lower=(txt||'').toLowerCase().trim();
+
+const hasDevanagari = /[\u0900-\u097F]/.test(txt);
+const hasMarathiLatin = /\b(kiti|kharch|maza|mala|koni|den|yen|dakhv|sang|ahe|baki)\b/i.test(lower);
+const isMr = hasDevanagari || hasMarathiLatin || (this.state.voicePersona || '').includes('mr');
+
+const cur=this.getCurrencyWord(this.state.currency,isMr);
+
+// Context Filtering
+const contextGroupId = document.getElementById('ai-context-group').value;
+const targetGroups = contextGroupId === 'ALL' ? this.state.groups : this.state.groups.filter(g => g.id === contextGroupId);
+const targetGroupIds = targetGroups.map(g => g.id);
+
+const intentDashboard = /dashboard|home|डॅशबोर्ड|होम|मुख्य|main/i.test(lower);
+const intentQuiz = /quiz|क्विझ|प्रश्न|game/i.test(lower);
+const intentGroups = /groups|trips|ग्रुप्स|ट्रिप्स|सहली|tour/i.test(lower);
+const intentHistory = /expenses|history|इतिहास|खर्च दाखव|नोंदी|kharch dakhv|record/i.test(lower);
+const intentOweMe = /owes me|येणे|कोणाकडे|who owes|maza kade|mala kiti/i.test(lower);
+const intentIOwe = /i owe|देणे|मला द्यायचे|how much i owe|माझी बाकी|maza kiti/i.test(lower);
+const intentFood = /food|जेवण|खाण्या|khanya|jevan/i.test(lower);
+
+if(intentDashboard){this.navigateTo('dashboard');response=isMr?'डॅशबोर्ड उघडत आहे':'Navigating to dashboard'}
+else if(intentQuiz){this.navigateTo('quiz');response=isMr?'क्विझ उघडत आहे':'Opening quiz'}
+else if(intentGroups){this.navigateTo('groups');response=isMr?'ग्रुप्स उघडत आहे':'Opening groups'}
+else if(intentHistory){this.navigateTo('expenses');response=isMr?'खर्चाचा इतिहास उघडत आहे':'Opening expense history'}
+
+// Contextual AI calculation for trip-wise debt splitting
+else if(intentOweMe){
+    let oweMeDetails = [];
+    targetGroups.forEach(g => {
+        const gExps = this.state.expenses.filter(e => e.groupId === g.id);
+        const gSetts = this.state.settlements.filter(s => s.groupId === g.id);
+        const bal = this.calculateBalances(gExps, gSetts);
+        const txs = this.simplifyDebts(bal);
+        const list = txs.filter(t => t.to === 'u_you');
+        
+        if (list.length > 0) {
+            if (isMr) {
+                const groupStr = list.map(t => `${this.getUser(t.from).name} कडून ${t.amount} ${cur}`).join(' आणि ');
+                oweMeDetails.push(`'${g.name}' ट्रिपमध्ये तुमचे ${groupStr} येणे बाकी आहे`);
+            } else {
+                const groupStr = list.map(t => `${this.getUser(t.from).name} owes you ${t.amount} ${cur}`).join(' and ');
+                oweMeDetails.push(`In '${g.name}' trip, ${groupStr}`);
             }
         }
+    });
+    
+    if (oweMeDetails.length > 0) {
+        response = oweMeDetails.join('. ');
+    } else {
+        if(contextGroupId !== 'ALL') response = isMr ? 'या ट्रिपमध्ये तुमचे कोणतेही येणे बाकी नाही' : 'No one owes you in this trip';
+        else response = isMr ? 'तुमचे कोणाकडूनही येणे बाकी नाही' : 'No one owes you right now';
+    }
+}
+else if(intentIOwe){
+    let iOweDetails = [];
+    targetGroups.forEach(g => {
+        const gExps = this.state.expenses.filter(e => e.groupId === g.id);
+        const gSetts = this.state.settlements.filter(s => s.groupId === g.id);
+        const bal = this.calculateBalances(gExps, gSetts);
+        const txs = this.simplifyDebts(bal);
+        const list = txs.filter(t => t.from === 'u_you');
+        
+        if (list.length > 0) {
+            if (isMr) {
+                const groupStr = list.map(t => `${this.getUser(t.to).name} ला ${t.amount} ${cur}`).join(' आणि ');
+                iOweDetails.push(`'${g.name}' ट्रिपमध्ये तुम्हाला ${groupStr} देणे बाकी आहे`);
+            } else {
+                const groupStr = list.map(t => `${t.amount} ${cur} to ${this.getUser(t.to).name}`).join(' and ');
+                iOweDetails.push(`In '${g.name}' trip, you owe ${groupStr}`);
+            }
+        }
+    });
+    
+    if (iOweDetails.length > 0) {
+        response = iOweDetails.join('. ');
+    } else {
+        if(contextGroupId !== 'ALL') response = isMr ? 'या ट्रिपमध्ये तुम्हाला कोणालाही देणे बाकी नाही' : 'You owe nothing in this trip';
+        else response = isMr ? 'तुम्हाला कोणालाही देणे बाकी नाही' : 'You do not owe anyone';
+    }
+}
+else if(intentFood){
+const total = this.state.expenses.filter(e => e.category === 'Food' && targetGroupIds.includes(e.groupId)).reduce((s, e) => s + Number(e.amount), 0);
+response=isMr?`जेवणावर आतापर्यंत ${total} ${cur} खर्च झाला आहे`:`Total food expense is ${total} ${cur}`;
+}else{
+const total = this.state.expenses.filter(e => targetGroupIds.includes(e.groupId)).reduce((s, e) => s + Number(e.amount), 0);
+response=isMr?`मी तुमच्या सेवेत आहे. तुमचा एकूण खर्च ${total} ${cur} आहे`:`I am here to help. Your total recorded spend is ${total} ${cur}`;
+}
 
-        let app;
-        document.addEventListener('DOMContentLoaded', () => { app = new ShareSpendPro(); });
-    </script>
+document.getElementById('assistant-response').innerText=response;
+this.speakAssistantResponse(response, isMr);
+}
+
+// ===== CRUD + TRUE DYNAMIC QUIZ =====
+openExpenseModal(){
+if(!this.state.groups.length)return alert(this.state.lang==='mr'?'आधी ग्रुप तयार करा':'Create a group first');
+document.getElementById('exp-group').innerHTML=this.state.groups.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
+this.updateExpensePaidByOptions();
+document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];
+document.getElementById('modal-expense').classList.remove('hidden')
+}
+
+updateExpensePaidByOptions(){
+const gId = document.getElementById('exp-group').value;
+const group = this.getGroup(gId);
+const memberOptions = group.members.map(mId => {
+const u = this.getUser(mId);
+return `<option value="${u.id}">${u.name}</option>`;
+}).join('');
+document.getElementById('exp-paidby').innerHTML = memberOptions;
+}
+
+saveExpense(e){
+e.preventDefault();
+const gId=document.getElementById('exp-group').value,group=this.getGroup(gId),amt=Number(document.getElementById('exp-amt').value);
+const splits={};
+group.members.forEach(m=>splits[m]=amt/group.members.length);
+this.state.expenses.unshift({id:'e_'+Date.now(),groupId:gId,paidBy:document.getElementById('exp-paidby').value,description:document.getElementById('exp-desc').value,amount:amt,category:document.getElementById('exp-cat').value,date:document.getElementById('exp-date').value,splits});
+this.saveState();this.closeModal('modal-expense');this.renderAll()
+}
+
+openGroupModal(){
+document.getElementById('grp-edit-id').value='';
+document.getElementById('grp-name').value='';
+document.getElementById('grp-budget').value='';
+document.getElementById('select-all-members').checked = true;
+document.getElementById('grp-members-checkboxes').innerHTML=this.state.users.map(u=>`<label class="checkbox-label"><input type="checkbox" value="${u.id}" checked> ${u.name}</label>`).join('');
+document.getElementById('modal-group-header-title').innerText=this.state.lang==='mr'?'नवीन ग्रुप':'Create Group';
+document.getElementById('modal-group').classList.remove('hidden')
+}
+
+editGroup(id){
+const g=this.getGroup(id);
+document.getElementById('grp-edit-id').value=g.id;
+document.getElementById('grp-name').value=g.name;
+document.getElementById('grp-type').value=g.type||'Trip';
+document.getElementById('grp-budget').value=g.budget||'';
+const allChecked = g.members.length === this.state.users.length && this.state.users.length > 0;
+document.getElementById('select-all-members').checked = allChecked;
+document.getElementById('grp-members-checkboxes').innerHTML=this.state.users.map(u=>`<label class="checkbox-label"><input type="checkbox" value="${u.id}" ${g.members.includes(u.id)?'checked':''}> ${u.name}</label>`).join('');
+document.getElementById('modal-group-header-title').innerText=this.state.lang==='mr'?'ग्रुप एडिट':'Edit Group';
+document.getElementById('modal-group').classList.remove('hidden')
+}
+
+toggleSelectAllMembers(masterCheckbox) {
+const checkboxes = document.querySelectorAll('#grp-members-checkboxes input[type="checkbox"]');
+checkboxes.forEach(cb => { cb.checked = masterCheckbox.checked; });
+}
+
+saveGroup(e){
+e.preventDefault();
+const id=document.getElementById('grp-edit-id').value,checked=Array.from(document.querySelectorAll('#grp-members-checkboxes input:checked')).map(c=>c.value);
+if(!checked.length)return alert('Select members');
+if(id){
+const g=this.getGroup(id);
+g.name=document.getElementById('grp-name').value;
+g.type=document.getElementById('grp-type').value;
+g.budget=Number(document.getElementById('grp-budget').value);
+g.members=checked;
+}else{
+this.state.groups.push({id:'g_'+Date.now(),name:document.getElementById('grp-name').value,type:document.getElementById('grp-type').value,budget:Number(document.getElementById('grp-budget').value),members:checked,notes:'',photos:[]})
+}
+this.saveState();this.closeModal('modal-group');this.renderAll()
+}
+
+deleteGroup(id){if(!confirm(this.state.lang==='mr'?'Bin मध्ये पाठवायचा?':'Move to Bin?'))return;const g=this.state.groups.find(x=>x.id===id);if(g){this.state.bin.groups.push(g);this.state.bin.expenses.push(...this.state.expenses.filter(e=>e.groupId===id));this.state.groups=this.state.groups.filter(x=>x.id!==id);this.state.expenses=this.state.expenses.filter(e=>e.groupId!==id);this.saveState();this.renderAll();this.showToast('Moved to Bin')}}
+restoreGroup(id){const g=this.state.bin.groups.find(x=>x.id===id);if(g){this.state.groups.push(g);this.state.expenses.push(...this.state.bin.expenses.filter(e=>e.groupId===id));this.state.bin.groups=this.state.bin.groups.filter(x=>x.id!==id);this.state.bin.expenses=this.state.bin.expenses.filter(e=>e.groupId!==id);this.saveState();this.renderAll();this.showToast('Restored')}}
+openAddMemberModal(){document.getElementById('mem-edit-id').value='';document.getElementById('mem-name').value='';document.getElementById('mem-email').value='';document.getElementById('mem-phone').value='';document.getElementById('member-modal-title').innerText=this.state.lang==='mr'?'नवीन सदस्य':'Add Member';document.getElementById('modal-member').classList.remove('hidden')}
+editMember(id){const u=this.getUser(id);document.getElementById('mem-edit-id').value=u.id;document.getElementById('mem-name').value=u.name;document.getElementById('mem-email').value=u.email||'';document.getElementById('mem-phone').value=u.phone||'';document.getElementById('member-modal-title').innerText=this.state.lang==='mr'?'सदस्य एडिट':'Edit Member';document.getElementById('modal-member').classList.remove('hidden')}
+saveMember(e){e.preventDefault();const id=document.getElementById('mem-edit-id').value,name=document.getElementById('mem-name').value,email=document.getElementById('mem-email').value,phone=document.getElementById('mem-phone').value;if(id){const u=this.getUser(id);u.name=name;u.email=email;u.phone=phone}else{this.state.users.push({id:'u_'+Date.now(),name,email,phone})}this.saveState();this.closeModal('modal-member');this.renderAll()}
+deleteMember(id){if(!confirm(this.state.lang==='mr'?'Bin मध्ये?':'Move to Bin?'))return;const u=this.state.users.find(x=>x.id===id);if(u){this.state.bin.users.push(u);this.state.users=this.state.users.filter(x=>x.id!==id);this.saveState();this.renderAll();this.showToast('Moved to Bin')}}
+restoreMember(id){const u=this.state.bin.users.find(x=>x.id===id);if(u){this.state.users.push(u);this.state.bin.users=this.state.bin.users.filter(x=>x.id!==id);this.saveState();this.renderAll();this.showToast('Restored')}}
+emptyBin(){if(!confirm('Permanently delete Bin?'))return;this.state.bin={groups:[],users:[],expenses:[]};this.saveState();this.renderAll();this.showToast('Bin emptied')}
+
+openSettleModal(){
+if(!this.state.groups.length)return alert('Create group first');
+document.getElementById('settle-group').innerHTML=this.state.groups.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
+this.updateSettleMemberOptions();
+document.getElementById('modal-settle').classList.remove('hidden')
+}
+
+updateSettleMemberOptions(){
+const gId = document.getElementById('settle-group').value;
+const group = this.getGroup(gId);
+const memberOptions = group.members.map(mId => {
+const u = this.getUser(mId);
+return `<option value="${u.id}">${u.name}</option>`;
+}).join('');
+document.getElementById('settle-payer').innerHTML = memberOptions;
+document.getElementById('settle-payee').innerHTML = memberOptions;
+}
+
+recordSettlement(e){
+e.preventDefault();
+this.state.settlements.unshift({id:'s_'+Date.now(),groupId:document.getElementById('settle-group').value,payerId:document.getElementById('settle-payer').value,payeeId:document.getElementById('settle-payee').value,amount:Number(document.getElementById('settle-amt').value),date:new Date().toISOString().split('T')[0]});
+this.saveState();this.closeModal('modal-settle');this.renderAll()
+}
+
+openGroupDetailsModal(gId){const g=this.getGroup(gId);document.getElementById('active-detail-group-id').value=g.id;document.getElementById('grp-detail-modal-title').innerText=g.name;document.getElementById('trip-notes-area').value=g.notes||'';this.renderInlineSheetRows(gId);this.renderTripPhotos(gId);document.getElementById('modal-group-details').classList.remove('hidden')}
+renderInlineSheetRows(gId){const g=this.getGroup(gId),exps=this.state.expenses.filter(e=>e.groupId===gId);let total=0;document.getElementById('inline-sheet-tbody').innerHTML=exps.map(e=>{total+=Number(e.amount);return `<tr data-eid="${e.id}"><td><input type="date" class="inline-date" value="${e.date}" style="padding:4px;font-size:11px"></td><td><input type="text" class="inline-desc" value="${e.description}" style="padding:4px"></td><td><select class="inline-cat" style="padding:4px"><option value="Food" ${e.category==='Food'?'selected':''}>Food</option><option value="Transport" ${e.category==='Transport'?'selected':''}>Transport</option><option value="Lodging" ${e.category==='Lodging'?'selected':''}>Lodging</option><option value="Others" ${e.category==='Others'?'selected':''}>Others</option></select></td><td><input type="number" class="inline-amt" value="${e.amount}" oninput="app.updateInlineSheetTotal()" style="padding:4px;width:70px"></td><td><select class="inline-payer" style="padding:4px">${g.members.map(mId=>{const u=this.getUser(mId);return `<option value="${u.id}" ${e.paidBy===u.id?'selected':''}>${u.name}</option>`}).join('')}</select></td><td><button class="btn btn-danger" style="padding:4px 8px" onclick="app.deleteInlineExpenseRow('${e.id}')">🗑️</button></td></tr>`}).join('');this.updateBudgetBars(g.budget,total)}
+updateInlineSheetTotal(){const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId);let total=0;document.querySelectorAll('.inline-amt').forEach(i=>total+=Number(i.value||0));this.updateBudgetBars(g.budget,total)}
+updateBudgetBars(b,t){document.getElementById('inline-sheet-budget').innerText=this.formatMoney(b);document.getElementById('inline-sheet-total').innerText=this.formatMoney(t);const r=document.getElementById('inline-sheet-remaining');r.innerText=this.formatMoney(b-t);r.style.color=(b-t)<0?'var(--danger)':'var(--primary)'}
+addInlineExpenseRow(){this.syncInlineSheetInputs();const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId);this.state.expenses.unshift({id:'e_'+Date.now(),groupId:gId,description:'',amount:0,category:'Others',date:new Date().toISOString().split('T')[0],paidBy:g.members[0]||'u_you',splits:{}});this.renderInlineSheetRows(gId)}
+deleteInlineExpenseRow(eId){this.syncInlineSheetInputs();const gId=document.getElementById('active-detail-group-id').value;this.state.expenses=this.state.expenses.filter(e=>e.id!==eId);this.renderInlineSheetRows(gId)}
+syncInlineSheetInputs(){const gId=document.getElementById('active-detail-group-id').value,group=this.getGroup(gId);document.querySelectorAll('#inline-sheet-tbody tr').forEach(tr=>{const exp=this.state.expenses.find(e=>e.id===tr.dataset.eid);if(exp){exp.date=tr.querySelector('.inline-date').value;exp.description=tr.querySelector('.inline-desc').value;exp.category=tr.querySelector('.inline-cat').value;exp.amount=Number(tr.querySelector('.inline-amt').value)||0;exp.paidBy=tr.querySelector('.inline-payer').value;const splits={};group.members.forEach(m=>splits[m]=exp.amount/group.members.length);exp.splits=splits}})}
+saveInlineSheetChanges(){this.syncInlineSheetInputs();const gId=document.getElementById('active-detail-group-id').value;this.getGroup(gId).notes=document.getElementById('trip-notes-area').value;this.saveState();this.closeModal('modal-group-details');this.renderAll();this.showToast(this.state.lang==='mr'?'सेव्ह झाले!':'Saved!')}
+
+handleTripPhotoUpload(ev){
+    const file = ev.target.files[0];
+    if(!file) return;
+
+    if (!file.type.startsWith('image/')) {
+        alert(this.state.lang === 'mr' ? 'कृपया फक्त फोटो (Image) फाईल अपलोड करा.' : 'Please upload an image file only.');
+        ev.target.value = '';
+        return;
+    }
+
+    const gId = document.getElementById('active-detail-group-id').value;
+    const group = this.getGroup(gId);
+    if(!group.photos) group.photos=[];
+
+    const reader = new FileReader();
+    reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+            const c = document.createElement('canvas'), ctx = c.getContext('2d'), s = Math.min(500/img.width, 1);
+            c.width = img.width * s; c.height = img.height * s;
+            ctx.drawImage(img, 0, 0, c.width, c.height);
+            group.photos.push({id: 'p_' + Date.now(), data: c.toDataURL('image/jpeg', 0.6)});
+            this.saveState();
+            this.renderTripPhotos(gId);
+            ev.target.value = '';
+            this.showToast(this.state.lang === 'mr' ? 'फोटो अपलोड झाला!' : 'Photo uploaded!');
+        };
+        img.onerror = () => {
+            alert(this.state.lang === 'mr' ? 'अवैध फोटो फाईल.' : 'Invalid image file.');
+            ev.target.value = '';
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+renderTripPhotos(gId){
+    const group=this.getGroup(gId),c=document.getElementById('trip-photos-container');
+    if(!group.photos||!group.photos.length){
+        c.innerHTML='<span style="font-size:11px;color:var(--text-sub)">No photos</span>';
+        return;
+    }
+    c.innerHTML=group.photos.map(p=>`
+        <div style="position:relative;width:80px;height:80px;border-radius:8px;overflow:hidden;border:1px solid var(--border-color);box-shadow:0 2px 5px rgba(0,0,0,0.1)">
+            <img src="${p.data}" style="width:100%;height:100%;object-fit:cover;cursor:pointer" onclick="window.open('${p.data}','_blank')">
+            <button type="button" onclick="app.deleteTripPhoto('${gId}','${p.id}')" title="Remove Photo" style="position:absolute;top:4px;right:4px;background:rgba(239,68,68,0.95);color:#fff;border:none;border-radius:50%;width:22px;height:22px;font-size:11px;font-weight:bold;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,0.2);">✕</button>
+        </div>
+    `).join('');
+}
+
+deleteTripPhoto(gId,pId){
+    if(confirm(this.state.lang==='mr'?'हा फोटो खरोखर डिलीट करायचा आहे का?':'Delete this photo?')) {
+        const g=this.getGroup(gId);
+        if(g&&g.photos){
+            g.photos=g.photos.filter(p=>p.id!==pId);
+            this.saveState();
+            this.renderTripPhotos(gId);
+            this.showToast(this.state.lang==='mr'?'फोटो डिलीट केला!':'Photo removed!');
+        }
+    }
+}
+
+exportSpecificGroupCSV(){const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId),exps=this.state.expenses.filter(e=>e.groupId===gId);if(!exps.length)return alert('No expenses');let csv=`Group,${g.name}\nBudget,${g.budget}\nNotes,"${g.notes||''}"\n\nDate,Description,Category,Paid By,Amount\n`;exps.forEach(e=>csv+=`${e.date},"${e.description}",${e.category},${this.getUser(e.paidBy).name},${e.amount}\n`);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=g.name.replace(/\s+/g,'_')+'_Ledger.csv';a.click()}
+
+// NEW TRUE DYNAMIC QUIZ GENERATOR
+generateDynamicQuiz(){
+    this.dynamicQuestions=[];
+    const isMr=this.state.lang==='mr', cur=this.getCurrencyWord(this.state.currency,isMr);
+    
+    // Default static question
+    this.dynamicQuestions.push({
+        q: isMr ? "Simplified Debt चा मुख्य फायदा काय?" : "Primary benefit of simplified debt?",
+        options: [isMr?"खर्च कमी":"Reduces spend", isMr?"व्यवहार कमी":"Fewer transactions", isMr?"फक्त एडमिन":"Only admin"],
+        ans: 1
+    });
+
+    if(this.state.groups.length > 0){
+        const g = this.state.groups[Math.floor(Math.random()*this.state.groups.length)];
+        
+        // Dynamic Question: Budget
+        this.dynamicQuestions.push({
+            q: isMr ? `'${g.name}' चे एकूण बजेट किती आहे?` : `What is the total budget of '${g.name}'?`,
+            options: [`${g.budget} ${cur}`, `${g.budget+2000} ${cur}`, `${Math.max(0, g.budget-1500)} ${cur}`],
+            ans: 0
+        });
+
+        // Dynamic Question: Member Count
+        this.dynamicQuestions.push({
+            q: isMr ? `'${g.name}' मध्ये किती सदस्य आहेत?` : `How many members are in '${g.name}'?`,
+            options: [`${g.members.length}`, `${g.members.length + 2}`, `${g.members.length + 5}`],
+            ans: 0
+        });
+    }
+
+    if(this.state.expenses.length > 0){
+        const total = this.state.expenses.reduce((s,e)=>s+Number(e.amount),0);
+        // Dynamic Question: Total Spend
+        this.dynamicQuestions.push({
+            q: isMr ? "आतापर्यंत सर्व ट्रिप्समध्ये मिळून एकूण किती खर्च झाला आहे?" : "What is the total overall spending so far?",
+            options: [`${total} ${cur}`, `${total+1200} ${cur}`, `${Math.max(0, total-500)} ${cur}`],
+            ans: 0
+        });
+
+        // Dynamic Question: Who paid for specific expense
+        const randomExp = this.state.expenses[Math.floor(Math.random() * this.state.expenses.length)];
+        if(randomExp.description) {
+            const payerName = this.getUser(randomExp.paidBy).name;
+            const otherUser = this.state.users.find(u => u.id !== randomExp.paidBy)?.name || "Admin";
+            this.dynamicQuestions.push({
+                q: isMr ? `'${randomExp.description}' साठी कोणी पैसे दिले?` : `Who paid for '${randomExp.description}'?`,
+                options: [payerName, otherUser, isMr ? "कोणीही नाही" : "No one"],
+                ans: 0
+            });
+        }
+    }
+
+    // Shuffle options so correct answer is not always first
+    this.dynamicQuestions.forEach(q => {
+        const correctOpt = q.options[q.ans];
+        for (let i = q.options.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+        }
+        q.ans = q.options.indexOf(correctOpt);
+    });
+}
+
+renderQuiz(){if(!this.dynamicQuestions||!this.dynamicQuestions.length)this.generateDynamicQuiz();const q=this.dynamicQuestions[this.state.quizIndex||0];document.getElementById('quiz-score-badge').innerText=`Score: ${this.state.quizScore||0} / ${this.dynamicQuestions.length}`;const box=document.getElementById('quiz-card-container');if(!q){box.innerHTML=`<div class="text-center space-y-4"><h3>🎉 Completed!</h3><button class="btn btn-primary" onclick="app.state.quizIndex=0;app.state.quizScore=0;app.generateDynamicQuiz();app.renderQuiz()">Restart</button></div>`;return}box.innerHTML=`<div class="space-y-4"><span style="font-size:11px;font-weight:700;color:var(--primary)">Q ${(this.state.quizIndex||0)+1} / ${this.dynamicQuestions.length}</span><h3 style="font-size:16px;font-weight:700">${q.q}</h3><div class="space-y-2">${q.options.map((o,i)=>`<button class="btn btn-secondary w-full text-left" style="padding:12px;justify-content:flex-start" onclick="app.handleQuizAnswer(${i},${q.ans})">${o}</button>`).join('')}</div></div>`}
+handleQuizAnswer(idx,correct){if(idx===correct){this.state.quizScore=(this.state.quizScore||0)+1;alert(this.state.lang==='mr'?'✨ बरोबर!':'✨ Correct!')}else alert(this.state.lang==='mr'?'❌ चुकीचे':'❌ Incorrect');this.state.quizIndex=(this.state.quizIndex||0)+1;this.renderQuiz()}
+exportCSV(){const csv='Date,Description,Category,Amount\n'+this.state.expenses.map(e=>`${e.date},"${e.description}",${e.category},${e.amount}`).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='Master_Ledger.csv';a.click()}
+resetAllData(){if(confirm('Clear all data permanently?')){localStorage.removeItem(STORAGE_KEY);location.reload()}}
+showToast(msg){const t=document.createElement('div');t.className='toast';t.innerText=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2500)}
+}
+
+let app;
+document.addEventListener('DOMContentLoaded',()=>{app=new ShareSpendPro()});
+</script>
 </body>
 </html>
