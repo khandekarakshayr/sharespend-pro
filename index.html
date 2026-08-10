@@ -42,7 +42,7 @@ input:focus,select:focus,textarea:focus{border-color:var(--primary)}
 .pulse-mic{animation:pulse 1.5s infinite}@keyframes pulse{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,.7)}70%{transform:scale(1.05);box-shadow:0 0 0 12px rgba(239,68,68,0)}100%{transform:scale(1);box-shadow:0 0 0 0 rgba(239,68,68,0)}}
 .badge{padding:4px 10px;border-radius:99px;font-size:11px;font-weight:700;text-transform:uppercase}
 .checkbox-group{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}.checkbox-label{display:flex;align-items:center;gap:6px;font-size:12px;background:var(--bg-card);padding:6px 12px;border-radius:8px;cursor:pointer;border:1px solid var(--border-color)}
-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-width:600px}th,td{border:1px solid var(--border-color);padding:8px;text-align:left;vertical-align:middle}th{background:var(--bg-sub);font-weight:700}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-width:650px}th,td{border:1px solid var(--border-color);padding:8px;text-align:left;vertical-align:middle}th{background:var(--bg-sub);font-weight:700}
 .table-responsive{width:100%;overflow-x:auto;border:1px solid var(--border-color);border-radius:8px;margin-bottom:16px}
 </style>
 </head>
@@ -51,8 +51,9 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 <aside class="sidebar">
 <div class="space-y-6">
 <div class="flex items-center space-x-3 cursor-pointer" onclick="app.navigateTo('dashboard')">
-<div style="width:40px;height:40px;border-radius:12px;overflow:hidden;flex-shrink:0;border:1px solid var(--border-color);background:#fff;">
-<img src="logo.jpg" alt="ShareSpend Logo" style="width:100%;height:100%;object-fit:cover;">
+<div style="width:40px;height:40px;border-radius:12px;overflow:hidden;flex-shrink:0;border:1px solid var(--border-color);background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:bold;font-size:22px;" id="logo-container">
+<img src="logo.jpg" alt="ShareSpend Logo" style="width:100%;height:100%;object-fit:cover;" onerror="this.style.display='none'; document.getElementById('logo-fallback').style.display='block';">
+<span id="logo-fallback" style="display:none;">₹</span>
 </div>
 <div><h2 style="font-size:18px;font-weight:800">ShareSpend</h2><p style="font-size:11px;color:var(--text-sub)">Pro Edition</p></div>
 </div>
@@ -143,7 +144,6 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
         <option value="en_male">👨 David (English)</option>
         </select>
     </div>
-    <!-- NEW TRIP CONTEXT SELECTOR -->
     <div>
         <span style="font-size:12px;font-weight:700;color:var(--text-sub)">📍 Context:</span>
         <select id="ai-context-group" style="width:auto;padding:6px 12px;border-radius:20px;font-weight:600;font-size:12px;border:1px solid var(--primary)">
@@ -205,7 +205,8 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 <button class="mobile-nav-btn" onclick="app.navigateTo('dashboard')">📊<span>Home</span></button>
 <button class="mobile-nav-btn" onclick="app.navigateTo('groups')">👥<span>Groups</span></button>
 <button class="mobile-nav-btn" onclick="app.openExpenseModal()" style="font-size:20px;color:var(--primary)">➕</button>
-<button class="mobile-nav-btn" onclick="app.navigateTo('assistant')">🎙️<span>Voice</span></button>
+<!-- REPLACED VOICE BUTTON WITH MEMBERS BUTTON -->
+<button class="mobile-nav-btn" onclick="app.navigateTo('members')">👤<span>Members</span></button>
 <button class="mobile-nav-btn" onclick="app.navigateTo('settings')">⚙️<span>Profile</span></button>
 </nav>
 
@@ -217,7 +218,11 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 <select id="exp-paidby" required></select>
 <input type="text" id="exp-desc" placeholder="Description" required>
 <input type="number" step="0.01" id="exp-amt" placeholder="Amount" required>
-<select id="exp-cat"><option value="Food">🍲 Food</option><option value="Transport">🚕 Transport</option><option value="Lodging">🏨 Lodging</option><option value="Others">🏷️ Others</option></select>
+<div class="grid grid-cols-2 gap-3">
+    <select id="exp-cat"><option value="Food">🍲 Food</option><option value="Transport">🚕 Transport</option><option value="Lodging">🏨 Lodging</option><option value="Others">🏷️ Others</option></select>
+    <!-- ADDED PAYMENT MODE -->
+    <select id="exp-paymode"><option value="UPI">📱 UPI</option><option value="Cash">💵 Cash</option><option value="Card">💳 Card</option><option value="Bank">🏦 Bank</option></select>
+</div>
 <input type="date" id="exp-date" required>
 <div class="flex justify-end pt-2"><button type="submit" class="btn btn-primary">Save</button></div>
 </form></div></div>
@@ -256,7 +261,8 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 <div class="flex space-x-2"><button class="btn btn-secondary" style="padding:6px 12px;font-size:11px" onclick="app.exportSpecificGroupCSV()">📥 CSV</button>
 <button class="btn btn-primary" style="padding:6px 12px;font-size:11px" onclick="app.addInlineExpenseRow()">+ Row</button></div></div>
 <div class="table-responsive" style="max-height:250px"><input type="hidden" id="active-detail-group-id">
-<table><thead><tr><th>Date</th><th>Desc</th><th>Cat</th><th>Amt</th><th>Paid By</th><th></th></tr></thead><tbody id="inline-sheet-tbody"></tbody></table></div>
+<!-- ADDED MODE COLUMN -->
+<table><thead><tr><th>Date</th><th>Desc</th><th>Cat</th><th>Mode</th><th>Amt</th><th>Paid By</th><th></th></tr></thead><tbody id="inline-sheet-tbody"></tbody></table></div>
 </div>
 <div><label style="font-size:12px;font-weight:700;color:var(--text-sub)" data-t="uploadPhotosLabel">📷 Photos</label>
 <input type="file" id="trip-file-upload" accept="image/*" onchange="app.handleTripPhotoUpload(event)" style="margin-top:6px; background:var(--bg-card);">
@@ -289,7 +295,7 @@ en:{dashboard:"Dashboard",groups:"Groups / Trips",expenses:"Expense History",mem
 mr:{dashboard:"डॅशबोर्ड",groups:"ग्रुप्स व ट्रिप्स",expenses:"खर्चाचा इतिहास",members:"सदस्य व्यवस्थापन",assistant:"AI व्हॉईस असिस्टंट",quiz:"डायनॅमिक क्विझ",settings:"सेटिंग्ज आणि प्रोफाइल",addExpense:"+ खर्च जोडा",newGroup:"+ नवीन ट्रिप",settleUp:"🤝 सेटल अप",youOwe:"तुमची देणे",youAreOwed:"तुमची येणे",totalSpend:"एकूण खर्च",tripSummaries:"🏕️ ट्रिप हिशोब",simplifiedDebts:"⚡ सोपे व्यवहार",welcome:"नमस्कार",overview:"मास्टर हिशोब",overviewSub:"सर्व ट्रिप्सची स्थिती.",speakMic:"ऐकत आहे... (आता बोला)",transcript:"तुम्ही म्हणालात",response:"AI उत्तर",whoOwesMe:"❓ माझे कोणाकडे पैसे?",howMuchOwe:"💸 मला कोणाला द्यायचे?",foodSpendBtn:"🍔 जेवणावर खर्च?",exportData:"📥 CSV डाउनलोड",resetData:"🗑️ सर्व डेटा साफ",addMemberBtn:"+ नवीन सदस्य",emailOptional:"ईमेल (पर्यायी)",phoneOptional:"फोन (पर्यायी)",notesLabel:"📝 नोंदी",uploadPhotosLabel:"📷 फोटो",profileSettings:"👤 प्रोफाइल",bin:"ट्रॅश / बिन",selectAgent:"🤖 AI एजंट निवडा"}
 };
 
-const STORAGE_KEY = 'sharespend_pro_v_final_build_14';
+const STORAGE_KEY = 'sharespend_pro_v_final_build_16';
 const INITIAL_STATE = {
 lang:'mr',currency:'INR',symbol:'₹',theme:'light',voicePersona:'mr_female',
 profile:{name:'Admin User',email:'admin@sharespend.app',phone:''},
@@ -445,7 +451,6 @@ document.getElementById('members-list').innerHTML = this.state.users.map(u => {
 document.getElementById('bin-groups-list').innerHTML = this.state.bin.groups.length === 0 ? `<p style="font-size:12px;color:var(--text-sub)">No deleted groups</p>` : this.state.bin.groups.map(g => `<div class="card space-y-2" style="background:#fee2e2;border-color:#fca5a5"><strong>${g.name}</strong><button class="btn btn-secondary w-full" style="font-size:11px;padding:6px" onclick="app.restoreGroup('${g.id}')">↩️ Restore</button></div>`).join('');
 document.getElementById('bin-members-list').innerHTML = this.state.bin.users.length === 0 ? `<p style="font-size:12px;color:var(--text-sub)">No deleted members</p>` : this.state.bin.users.map(u => `<div class="card flex justify-between items-center" style="background:#fee2e2;border-color:#fca5a5;padding:12px"><strong>${u.name}</strong><button class="btn btn-secondary" style="font-size:10px;padding:4px 8px" onclick="app.restoreMember('${u.id}')">↩️ Restore</button></div>`).join('');
 
-// Populate AI Context Dropdown dynamically
 const aiContextGroup = document.getElementById('ai-context-group');
 if(aiContextGroup) {
     const currentVal = aiContextGroup.value;
@@ -606,7 +611,6 @@ const isMr = hasDevanagari || hasMarathiLatin || (this.state.voicePersona || '')
 
 const cur=this.getCurrencyWord(this.state.currency,isMr);
 
-// Context Filtering
 const contextGroupId = document.getElementById('ai-context-group').value;
 const targetGroups = contextGroupId === 'ALL' ? this.state.groups : this.state.groups.filter(g => g.id === contextGroupId);
 const targetGroupIds = targetGroups.map(g => g.id);
@@ -624,7 +628,6 @@ else if(intentQuiz){this.navigateTo('quiz');response=isMr?'क्विझ उ�
 else if(intentGroups){this.navigateTo('groups');response=isMr?'ग्रुप्स उघडत आहे':'Opening groups'}
 else if(intentHistory){this.navigateTo('expenses');response=isMr?'खर्चाचा इतिहास उघडत आहे':'Opening expense history'}
 
-// Contextual AI calculation for trip-wise debt splitting
 else if(intentOweMe){
     let oweMeDetails = [];
     targetGroups.forEach(g => {
@@ -715,7 +718,8 @@ e.preventDefault();
 const gId=document.getElementById('exp-group').value,group=this.getGroup(gId),amt=Number(document.getElementById('exp-amt').value);
 const splits={};
 group.members.forEach(m=>splits[m]=amt/group.members.length);
-this.state.expenses.unshift({id:'e_'+Date.now(),groupId:gId,paidBy:document.getElementById('exp-paidby').value,description:document.getElementById('exp-desc').value,amount:amt,category:document.getElementById('exp-cat').value,date:document.getElementById('exp-date').value,splits});
+// ADDED PAYMENT MODE TO GLOBAL EXPENSE SAVE
+this.state.expenses.unshift({id:'e_'+Date.now(),groupId:gId,paidBy:document.getElementById('exp-paidby').value,description:document.getElementById('exp-desc').value,amount:amt,category:document.getElementById('exp-cat').value,paymentMode:document.getElementById('exp-paymode').value||'UPI',date:document.getElementById('exp-date').value,splits});
 this.saveState();this.closeModal('modal-expense');this.renderAll()
 }
 
@@ -797,12 +801,22 @@ this.saveState();this.closeModal('modal-settle');this.renderAll()
 }
 
 openGroupDetailsModal(gId){const g=this.getGroup(gId);document.getElementById('active-detail-group-id').value=g.id;document.getElementById('grp-detail-modal-title').innerText=g.name;document.getElementById('trip-notes-area').value=g.notes||'';this.renderInlineSheetRows(gId);this.renderTripPhotos(gId);document.getElementById('modal-group-details').classList.remove('hidden')}
-renderInlineSheetRows(gId){const g=this.getGroup(gId),exps=this.state.expenses.filter(e=>e.groupId===gId);let total=0;document.getElementById('inline-sheet-tbody').innerHTML=exps.map(e=>{total+=Number(e.amount);return `<tr data-eid="${e.id}"><td><input type="date" class="inline-date" value="${e.date}" style="padding:4px;font-size:11px"></td><td><input type="text" class="inline-desc" value="${e.description}" style="padding:4px"></td><td><select class="inline-cat" style="padding:4px"><option value="Food" ${e.category==='Food'?'selected':''}>Food</option><option value="Transport" ${e.category==='Transport'?'selected':''}>Transport</option><option value="Lodging" ${e.category==='Lodging'?'selected':''}>Lodging</option><option value="Others" ${e.category==='Others'?'selected':''}>Others</option></select></td><td><input type="number" class="inline-amt" value="${e.amount}" oninput="app.updateInlineSheetTotal()" style="padding:4px;width:70px"></td><td><select class="inline-payer" style="padding:4px">${g.members.map(mId=>{const u=this.getUser(mId);return `<option value="${u.id}" ${e.paidBy===u.id?'selected':''}>${u.name}</option>`}).join('')}</select></td><td><button class="btn btn-danger" style="padding:4px 8px" onclick="app.deleteInlineExpenseRow('${e.id}')">🗑️</button></td></tr>`}).join('');this.updateBudgetBars(g.budget,total)}
+renderInlineSheetRows(gId){const g=this.getGroup(gId),exps=this.state.expenses.filter(e=>e.groupId===gId);let total=0;
+document.getElementById('inline-sheet-tbody').innerHTML=exps.map(e=>{
+    total+=Number(e.amount);
+    // UPDATED TABLE ROW WITH PAYMENT MODE
+    return `<tr data-eid="${e.id}"><td><input type="date" class="inline-date" value="${e.date}" style="padding:4px;font-size:11px"></td><td><input type="text" class="inline-desc" value="${e.description}" style="padding:4px"></td><td><select class="inline-cat" style="padding:4px"><option value="Food" ${e.category==='Food'?'selected':''}>Food</option><option value="Transport" ${e.category==='Transport'?'selected':''}>Transport</option><option value="Lodging" ${e.category==='Lodging'?'selected':''}>Lodging</option><option value="Others" ${e.category==='Others'?'selected':''}>Others</option></select></td><td><select class="inline-paymode" style="padding:4px"><option value="UPI" ${e.paymentMode==='UPI'?'selected':''}>UPI</option><option value="Cash" ${e.paymentMode==='Cash'?'selected':''}>Cash</option><option value="Card" ${e.paymentMode==='Card'?'selected':''}>Card</option><option value="Bank" ${e.paymentMode==='Bank'?'selected':''}>Bank</option></select></td><td><input type="number" class="inline-amt" value="${e.amount}" oninput="app.updateInlineSheetTotal()" style="padding:4px;width:70px"></td><td><select class="inline-payer" style="padding:4px">${g.members.map(mId=>{const u=this.getUser(mId);return `<option value="${u.id}" ${e.paidBy===u.id?'selected':''}>${u.name}</option>`}).join('')}</select></td><td><button class="btn btn-danger" style="padding:4px 8px" onclick="app.deleteInlineExpenseRow('${e.id}')">🗑️</button></td></tr>`
+}).join('');
+this.updateBudgetBars(g.budget,total)}
+
 updateInlineSheetTotal(){const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId);let total=0;document.querySelectorAll('.inline-amt').forEach(i=>total+=Number(i.value||0));this.updateBudgetBars(g.budget,total)}
 updateBudgetBars(b,t){document.getElementById('inline-sheet-budget').innerText=this.formatMoney(b);document.getElementById('inline-sheet-total').innerText=this.formatMoney(t);const r=document.getElementById('inline-sheet-remaining');r.innerText=this.formatMoney(b-t);r.style.color=(b-t)<0?'var(--danger)':'var(--primary)'}
-addInlineExpenseRow(){this.syncInlineSheetInputs();const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId);this.state.expenses.unshift({id:'e_'+Date.now(),groupId:gId,description:'',amount:0,category:'Others',date:new Date().toISOString().split('T')[0],paidBy:g.members[0]||'u_you',splits:{}});this.renderInlineSheetRows(gId)}
+addInlineExpenseRow(){this.syncInlineSheetInputs();const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId);
+// ADDED PAYMENT MODE TO DEFAULT ROW
+this.state.expenses.unshift({id:'e_'+Date.now(),groupId:gId,description:'',amount:0,category:'Others',paymentMode:'UPI',date:new Date().toISOString().split('T')[0],paidBy:g.members[0]||'u_you',splits:{}});
+this.renderInlineSheetRows(gId)}
 deleteInlineExpenseRow(eId){this.syncInlineSheetInputs();const gId=document.getElementById('active-detail-group-id').value;this.state.expenses=this.state.expenses.filter(e=>e.id!==eId);this.renderInlineSheetRows(gId)}
-syncInlineSheetInputs(){const gId=document.getElementById('active-detail-group-id').value,group=this.getGroup(gId);document.querySelectorAll('#inline-sheet-tbody tr').forEach(tr=>{const exp=this.state.expenses.find(e=>e.id===tr.dataset.eid);if(exp){exp.date=tr.querySelector('.inline-date').value;exp.description=tr.querySelector('.inline-desc').value;exp.category=tr.querySelector('.inline-cat').value;exp.amount=Number(tr.querySelector('.inline-amt').value)||0;exp.paidBy=tr.querySelector('.inline-payer').value;const splits={};group.members.forEach(m=>splits[m]=exp.amount/group.members.length);exp.splits=splits}})}
+syncInlineSheetInputs(){const gId=document.getElementById('active-detail-group-id').value,group=this.getGroup(gId);document.querySelectorAll('#inline-sheet-tbody tr').forEach(tr=>{const exp=this.state.expenses.find(e=>e.id===tr.dataset.eid);if(exp){exp.date=tr.querySelector('.inline-date').value;exp.description=tr.querySelector('.inline-desc').value;exp.category=tr.querySelector('.inline-cat').value;exp.paymentMode=tr.querySelector('.inline-paymode')?tr.querySelector('.inline-paymode').value:'UPI';exp.amount=Number(tr.querySelector('.inline-amt').value)||0;exp.paidBy=tr.querySelector('.inline-payer').value;const splits={};group.members.forEach(m=>splits[m]=exp.amount/group.members.length);exp.splits=splits}})}
 saveInlineSheetChanges(){this.syncInlineSheetInputs();const gId=document.getElementById('active-detail-group-id').value;this.getGroup(gId).notes=document.getElementById('trip-notes-area').value;this.saveState();this.closeModal('modal-group-details');this.renderAll();this.showToast(this.state.lang==='mr'?'सेव्ह झाले!':'Saved!')}
 
 handleTripPhotoUpload(ev){
@@ -867,14 +881,20 @@ deleteTripPhoto(gId,pId){
     }
 }
 
-exportSpecificGroupCSV(){const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId),exps=this.state.expenses.filter(e=>e.groupId===gId);if(!exps.length)return alert('No expenses');let csv=`Group,${g.name}\nBudget,${g.budget}\nNotes,"${g.notes||''}"\n\nDate,Description,Category,Paid By,Amount\n`;exps.forEach(e=>csv+=`${e.date},"${e.description}",${e.category},${this.getUser(e.paidBy).name},${e.amount}\n`);const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=g.name.replace(/\s+/g,'_')+'_Ledger.csv';a.click()}
+exportSpecificGroupCSV(){
+    const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId),exps=this.state.expenses.filter(e=>e.groupId===gId);
+    if(!exps.length)return alert('No expenses');
+    let csv=`Group,${g.name}\nBudget,${g.budget}\nNotes,"${g.notes||''}"\n\nDate,Description,Category,Payment Mode,Paid By,Amount\n`;
+    exps.forEach(e=>csv+=`${e.date},"${e.description}",${e.category},${e.paymentMode||'UPI'},${this.getUser(e.paidBy).name},${e.amount}\n`);
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=g.name.replace(/\s+/g,'_')+'_Ledger.csv';a.click()
+}
 
 // NEW TRUE DYNAMIC QUIZ GENERATOR
 generateDynamicQuiz(){
     this.dynamicQuestions=[];
     const isMr=this.state.lang==='mr', cur=this.getCurrencyWord(this.state.currency,isMr);
     
-    // Default static question
+    // Static question
     this.dynamicQuestions.push({
         q: isMr ? "Simplified Debt चा मुख्य फायदा काय?" : "Primary benefit of simplified debt?",
         options: [isMr?"खर्च कमी":"Reduces spend", isMr?"व्यवहार कमी":"Fewer transactions", isMr?"फक्त एडमिन":"Only admin"],
@@ -934,7 +954,7 @@ generateDynamicQuiz(){
 
 renderQuiz(){if(!this.dynamicQuestions||!this.dynamicQuestions.length)this.generateDynamicQuiz();const q=this.dynamicQuestions[this.state.quizIndex||0];document.getElementById('quiz-score-badge').innerText=`Score: ${this.state.quizScore||0} / ${this.dynamicQuestions.length}`;const box=document.getElementById('quiz-card-container');if(!q){box.innerHTML=`<div class="text-center space-y-4"><h3>🎉 Completed!</h3><button class="btn btn-primary" onclick="app.state.quizIndex=0;app.state.quizScore=0;app.generateDynamicQuiz();app.renderQuiz()">Restart</button></div>`;return}box.innerHTML=`<div class="space-y-4"><span style="font-size:11px;font-weight:700;color:var(--primary)">Q ${(this.state.quizIndex||0)+1} / ${this.dynamicQuestions.length}</span><h3 style="font-size:16px;font-weight:700">${q.q}</h3><div class="space-y-2">${q.options.map((o,i)=>`<button class="btn btn-secondary w-full text-left" style="padding:12px;justify-content:flex-start" onclick="app.handleQuizAnswer(${i},${q.ans})">${o}</button>`).join('')}</div></div>`}
 handleQuizAnswer(idx,correct){if(idx===correct){this.state.quizScore=(this.state.quizScore||0)+1;alert(this.state.lang==='mr'?'✨ बरोबर!':'✨ Correct!')}else alert(this.state.lang==='mr'?'❌ चुकीचे':'❌ Incorrect');this.state.quizIndex=(this.state.quizIndex||0)+1;this.renderQuiz()}
-exportCSV(){const csv='Date,Description,Category,Amount\n'+this.state.expenses.map(e=>`${e.date},"${e.description}",${e.category},${e.amount}`).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='Master_Ledger.csv';a.click()}
+exportCSV(){const csv='Date,Description,Category,Payment Mode,Amount\n'+this.state.expenses.map(e=>`${e.date},"${e.description}",${e.category},${e.paymentMode||'UPI'},${e.amount}`).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='Master_Ledger.csv';a.click()}
 resetAllData(){if(confirm('Clear all data permanently?')){localStorage.removeItem(STORAGE_KEY);location.reload()}}
 showToast(msg){const t=document.createElement('div');t.className='toast';t.innerText=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2500)}
 }
