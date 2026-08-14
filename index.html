@@ -71,8 +71,8 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 </div>
 <div style="padding-top:16px;border-top:1px solid var(--border-color);margin-top:auto">
 <div style="display:flex;align-items:center;gap:12px;cursor:pointer;padding:8px;border-radius:12px" onclick="app.navigateTo('settings')">
-<div id="sidebar-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px">ME</div>
-<div style="min-width:0"><p id="sidebar-name" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0">Your Name</p>
+<div id="sidebar-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:14px;overflow:hidden;flex-shrink:0;">ME</div>
+<div style="min-width:0"><p id="sidebar-name" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0">Admin User</p>
 <p id="sidebar-email" style="font-size:11px;color:var(--text-sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0">admin@sharespend.app</p></div>
 </div></div>
 </aside>
@@ -84,8 +84,8 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 <select id="lang-select" onchange="app.changeLanguage(this.value)" style="width:auto;padding:6px;font-weight:700;border-radius:8px">
 <option value="mr">🌐 मराठी</option><option value="en">🌐 English</option>
 </select>
-<select id="currency-select" onchange="app.changeCurrency(this.value)" style="width:auto;padding:6px;border-radius:8px;font-weight:600">
-<option value="INR">₹ INR</option><option value="USD">$ USD</option><option value="EUR">€ EUR</option><option value="GBP">£ GBP</option>
+<select id="currency-select" onchange="app.changeCurrencyPrompt(this.value)" style="width:auto;padding:6px;border-radius:8px;font-weight:600">
+<option value="INR">₹ INR</option><option value="USD">$ USD</option>
 </select>
 <button class="btn btn-secondary" onclick="app.toggleDarkMode()">🌙</button>
 </div>
@@ -175,13 +175,34 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 
 <section id="view-settings" class="hidden space-y-6">
 <h2 data-t="settings">Settings & Profile</h2>
+
 <div class="card space-y-4">
 <h3 data-t="profileSettings">👤 Profile Settings</h3>
+<div>
+    <label style="font-size:12px;font-weight:600">Profile Picture</label>
+    <div class="flex items-center space-x-3" style="margin-top:6px;">
+        <div id="settings-avatar-preview" style="width:45px;height:45px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:16px;overflow:hidden;flex-shrink:0;">
+        </div>
+        <input type="file" accept="image/*" onchange="app.handleAvatarUpload(event)" style="padding:6px;background:var(--bg-card);">
+        <button class="btn btn-secondary" onclick="app.removeAvatar()" title="Remove Photo" style="padding:8px 12px">🗑️</button>
+    </div>
+</div>
 <div><label style="font-size:12px;font-weight:600">Your Full Name</label><input type="text" id="set-name"></div>
 <div><label style="font-size:12px;font-weight:600" data-t="emailOptional">Email</label><input type="email" id="set-email"></div>
 <div><label style="font-size:12px;font-weight:600" data-t="phoneOptional">Phone</label><input type="tel" id="set-phone"></div>
 <button class="btn btn-primary" onclick="app.saveProfile()">Save Profile</button>
 </div>
+
+<div class="card space-y-4">
+<h3>💱 Currency Exchange Rate</h3>
+<p style="font-size:12px;color:var(--text-sub)">Set custom USD ($) to INR (₹) conversion rate.</p>
+<div class="flex items-center space-x-2">
+    <span style="font-size:13px;font-weight:700;">1 USD ($) = ₹</span>
+    <input type="number" step="0.01" id="set-exchange-rate" style="width:120px;" value="84.00">
+    <button class="btn btn-secondary" onclick="app.saveExchangeRate()">Update Rate</button>
+</div>
+</div>
+
 <div class="card space-y-4">
 <h3>🎙️ AI Voice Persona</h3>
 <select id="voice-persona-select" onchange="app.changeAgent(this.value)" style="width:100%;padding:10px 14px;border-radius:10px;font-weight:600;border:1px solid var(--primary)">
@@ -192,8 +213,12 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 <button class="btn btn-secondary w-full" onclick="app.testVoice()">🔊 Test Voice</button>
 </div>
 <div class="card space-y-4">
-<button class="btn btn-secondary" onclick="app.exportCSV()" data-t="exportData">📥 Export CSV</button>
-<button class="btn btn-danger" onclick="app.resetAllData()" data-t="resetData">🗑️ Clear All Data</button>
+<h3>📥 Export Data (CSV)</h3>
+<select id="export-trip-select" style="width:100%;padding:10px 14px;border-radius:10px;font-weight:600;border:1px solid var(--border-color);background:var(--bg-sub);margin-bottom:10px;">
+</select>
+<button class="btn btn-secondary w-full" onclick="app.exportSelectedCSV()">Download Ledger CSV</button>
+<hr style="border:none;border-top:1px solid var(--border-color);margin:16px 0">
+<button class="btn btn-danger w-full" onclick="app.resetAllData()" data-t="resetData">🗑️ Clear All Data</button>
 </div>
 </section>
 </main>
@@ -205,34 +230,59 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 <button class="mobile-nav-btn" onclick="app.navigateTo('dashboard')">📊<span>Home</span></button>
 <button class="mobile-nav-btn" onclick="app.navigateTo('groups')">👥<span>Groups</span></button>
 <button class="mobile-nav-btn" onclick="app.openExpenseModal()" style="font-size:20px;color:var(--primary)">➕</button>
-<!-- REPLACED VOICE BUTTON WITH MEMBERS BUTTON -->
 <button class="mobile-nav-btn" onclick="app.navigateTo('members')">👤<span>Members</span></button>
 <button class="mobile-nav-btn" onclick="app.navigateTo('settings')">⚙️<span>Profile</span></button>
 </nav>
 
 <!-- MODALS -->
+<!-- MAIN EXPENSE MODAL (COMPLEX SPLITS) -->
 <div id="modal-expense" class="modal-overlay hidden"><div class="modal-content space-y-4" style="max-width:500px">
 <div class="flex justify-between items-center"><h3 data-t="addExpense">Add Expense</h3><button onclick="app.closeModal('modal-expense')" style="border:none;background:none;cursor:pointer;font-size:18px">✕</button></div>
 <form onsubmit="app.saveExpense(event)" class="space-y-3">
-<select id="exp-group" required onchange="app.updateExpensePaidByOptions()"></select>
-<select id="exp-paidby" required></select>
+<select id="exp-group" required onchange="app.updateExpenseUI()"></select>
+
 <input type="text" id="exp-desc" placeholder="Description" required>
-<input type="number" step="0.01" id="exp-amt" placeholder="Amount" required>
+<input type="number" step="0.01" id="exp-amt" placeholder="Amount" required oninput="app.autoCalculateSplits()">
+
 <div class="grid grid-cols-2 gap-3">
     <select id="exp-cat"><option value="Food">🍲 Food</option><option value="Transport">🚕 Transport</option><option value="Lodging">🏨 Lodging</option><option value="Others">🏷️ Others</option></select>
-    <!-- ADDED PAYMENT MODE -->
     <select id="exp-paymode"><option value="UPI">📱 UPI</option><option value="Cash">💵 Cash</option><option value="Card">💳 Card</option><option value="Bank">🏦 Bank</option></select>
 </div>
+
+<div style="background:var(--bg-sub);padding:12px;border-radius:10px;border:1px solid var(--border-color);" class="space-y-2">
+    <label style="font-size:12px;font-weight:700;">Paid By:</label>
+    <select id="exp-paidby" required onchange="app.togglePayerUI()"></select>
+    <div id="exp-multiple-payers-container" class="hidden space-y-2 p-2" style="max-height:150px;overflow-y:auto;border-top:1px dashed var(--border-color);margin-top:8px;padding-top:8px;">
+    </div>
+</div>
+
+<div style="background:var(--bg-sub);padding:12px;border-radius:10px;border:1px solid var(--border-color);" class="space-y-2">
+    <label style="font-size:12px;font-weight:700;">Split How?</label>
+    <select id="exp-split-type" required onchange="app.updateSplitUI()">
+        <option value="EQUALLY_ALL">Equally (All Group Members)</option>
+        <option value="EQUALLY_SOME">Equally (Selected Members only)</option>
+        <option value="UNEQUALLY">Unequally (Enter specific amounts)</option>
+        <option value="ON_BEHALF">On Behalf Of (One person owes full amount)</option>
+    </select>
+    <div id="exp-split-dynamic-container" class="hidden space-y-2 p-2" style="max-height:150px;overflow-y:auto;border-top:1px dashed var(--border-color);margin-top:8px;padding-top:8px;">
+    </div>
+</div>
+
 <input type="date" id="exp-date" required>
-<div class="flex justify-end pt-2"><button type="submit" class="btn btn-primary">Save</button></div>
+<div class="flex justify-end pt-2"><button type="submit" class="btn btn-primary">Save Expense</button></div>
 </form></div></div>
 
+<!-- GROUP CREATION MODAL -->
 <div id="modal-group" class="modal-overlay hidden"><div class="modal-content space-y-4" style="max-width:500px">
 <div class="flex justify-between items-center"><h3 id="modal-group-header-title">Create Group</h3><button type="button" onclick="app.closeModal('modal-group')" style="border:none;background:none;cursor:pointer;font-size:18px">✕</button></div>
 <form onsubmit="app.saveGroup(event)" class="space-y-3">
 <input type="hidden" id="grp-edit-id"><input type="text" id="grp-name" placeholder="Group/Trip Name" required>
 <div class="grid grid-cols-2 gap-3"><select id="grp-type"><option value="Trip">🏖️ Trip</option><option value="Event">🎉 Event</option></select>
-<input type="number" id="grp-budget" placeholder="Budget"></div>
+<input type="number" step="0.01" id="grp-budget" placeholder="Total Budget"></div>
+
+<label class="checkbox-label" style="background:var(--bg-sub);margin-top:6px;font-weight:600;padding:10px;border:1px solid #93c5fd;color:#1e40af;">
+    <input type="checkbox" id="grp-is-pool"> 💰 Budget is Pre-Collected (Group Fund Pool)
+</label>
 
 <div style="margin-top: 10px; border: 1px solid var(--border-color); border-radius: 10px; padding: 12px; background: var(--bg-sub);">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding-bottom:8px; border-bottom:1px solid #cbd5e1;">
@@ -248,6 +298,7 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 <button type="submit" class="btn btn-primary">Save</button></div>
 </form></div></div>
 
+<!-- TRIP DETAILS MODAL -->
 <div id="modal-group-details" class="modal-overlay hidden"><div class="modal-content space-y-4">
 <div class="flex justify-between items-center"><h3 id="grp-detail-modal-title">Trip Ledger</h3><button onclick="app.closeModal('modal-group-details')" style="border:none;background:none;cursor:pointer;font-size:18px">✕</button></div>
 <div class="budget-bar">
@@ -258,10 +309,11 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 <div><label style="font-size:12px;font-weight:700;color:var(--text-sub)" data-t="notesLabel">📝 Notes</label><textarea id="trip-notes-area" class="notes-area"></textarea></div>
 <div class="space-y-2">
 <div class="flex justify-between items-center"><span style="font-size:13px;font-weight:700">Sub-Sheet</span>
-<div class="flex space-x-2"><button class="btn btn-secondary" style="padding:6px 12px;font-size:11px" onclick="app.exportSpecificGroupCSV()">📥 CSV</button>
+<div class="flex space-x-2">
+<button class="btn btn-secondary" style="padding:6px 12px;font-size:11px" onclick="app.exportSpecificGroupCSV()">📥 CSV</button>
+<button class="btn btn-primary" style="background:#6366f1;padding:6px 12px;font-size:11px" onclick="app.openAdvancedExpenseFromInline()">+ Adv Split</button>
 <button class="btn btn-primary" style="padding:6px 12px;font-size:11px" onclick="app.addInlineExpenseRow()">+ Row</button></div></div>
 <div class="table-responsive" style="max-height:250px"><input type="hidden" id="active-detail-group-id">
-<!-- ADDED MODE COLUMN -->
 <table><thead><tr><th>Date</th><th>Desc</th><th>Cat</th><th>Mode</th><th>Amt</th><th>Paid By</th><th></th></tr></thead><tbody id="inline-sheet-tbody"></tbody></table></div>
 </div>
 <div><label style="font-size:12px;font-weight:700;color:var(--text-sub)" data-t="uploadPhotosLabel">📷 Photos</label>
@@ -270,6 +322,7 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 <div class="flex justify-end pt-4"><button class="btn btn-primary" onclick="app.saveInlineSheetChanges()">💾 Save All</button></div>
 </div></div>
 
+<!-- SETTLE MODAL -->
 <div id="modal-settle" class="modal-overlay hidden"><div class="modal-content space-y-4" style="max-width:400px">
 <div class="flex justify-between items-center"><h3>Record Settlement</h3><button type="button" onclick="app.closeModal('modal-settle')" style="border:none;background:none;cursor:pointer;font-size:18px">✕</button></div>
 <form onsubmit="app.recordSettlement(event)" class="space-y-3">
@@ -280,6 +333,7 @@ table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-wid
 <div class="flex justify-end pt-2"><button type="submit" class="btn btn-primary">Record</button></div>
 </form></div></div>
 
+<!-- MEMBER MODAL -->
 <div id="modal-member" class="modal-overlay hidden"><div class="modal-content space-y-4" style="max-width:400px">
 <div class="flex justify-between items-center"><h3 id="member-modal-title">Add Member</h3><button type="button" onclick="app.closeModal('modal-member')" style="border:none;background:none;cursor:pointer;font-size:18px">✕</button></div>
 <form onsubmit="app.saveMember(event)" class="space-y-3">
@@ -295,12 +349,14 @@ en:{dashboard:"Dashboard",groups:"Groups / Trips",expenses:"Expense History",mem
 mr:{dashboard:"डॅशबोर्ड",groups:"ग्रुप्स व ट्रिप्स",expenses:"खर्चाचा इतिहास",members:"सदस्य व्यवस्थापन",assistant:"AI व्हॉईस असिस्टंट",quiz:"डायनॅमिक क्विझ",settings:"सेटिंग्ज आणि प्रोफाइल",addExpense:"+ खर्च जोडा",newGroup:"+ नवीन ट्रिप",settleUp:"🤝 सेटल अप",youOwe:"तुमची देणे",youAreOwed:"तुमची येणे",totalSpend:"एकूण खर्च",tripSummaries:"🏕️ ट्रिप हिशोब",simplifiedDebts:"⚡ सोपे व्यवहार",welcome:"नमस्कार",overview:"मास्टर हिशोब",overviewSub:"सर्व ट्रिप्सची स्थिती.",speakMic:"ऐकत आहे... (आता बोला)",transcript:"तुम्ही म्हणालात",response:"AI उत्तर",whoOwesMe:"❓ माझे कोणाकडे पैसे?",howMuchOwe:"💸 मला कोणाला द्यायचे?",foodSpendBtn:"🍔 जेवणावर खर्च?",exportData:"📥 CSV डाउनलोड",resetData:"🗑️ सर्व डेटा साफ",addMemberBtn:"+ नवीन सदस्य",emailOptional:"ईमेल (पर्यायी)",phoneOptional:"फोन (पर्यायी)",notesLabel:"📝 नोंदी",uploadPhotosLabel:"📷 फोटो",profileSettings:"👤 प्रोफाइल",bin:"ट्रॅश / बिन",selectAgent:"🤖 AI एजंट निवडा"}
 };
 
-const STORAGE_KEY = 'sharespend_pro_v_final_build_16';
+const STORAGE_KEY = 'sharespend_pro_v_final_build_36';
+const EXCHANGE_RATE = 84;
+
 const INITIAL_STATE = {
-lang:'mr',currency:'INR',symbol:'₹',theme:'light',voicePersona:'mr_female',
-profile:{name:'Admin User',email:'admin@sharespend.app',phone:''},
-users:[{id:'u_you',name:'Admin User',email:'admin@sharespend.app',phone:''}],
-groups:[{id:'g_cycle',name:'Cycling Tour',type:'Trip',budget:15000,members:['u_you'],notes:'',photos:[]}],
+lang:'mr',currency:'INR',symbol:'₹',theme:'light',voicePersona:'mr_female',exchangeRate:84.00,
+profile:{name:'Akshay Khandekar',email:'admin@sharespend.app',phone:'',avatar:null},
+users:[{id:'u_you',name:'Akshay Khandekar',email:'admin@sharespend.app',phone:''}],
+groups:[{id:'g_cycle',name:'Cycling Tour',type:'Trip',budget:15000,isPool:false,members:['u_you'],notes:'',photos:[]}],
 expenses:[],settlements:[],quizIndex:0,quizScore:0,bin:{groups:[],users:[],expenses:[]}
 };
 
@@ -315,6 +371,9 @@ class ShareSpendPro {
 constructor(){
 this.state=this.loadState();
 if(!this.state.bin) this.state.bin={groups:[],users:[],expenses:[]};
+if(!this.state.exchangeRate) this.state.exchangeRate = 84.00;
+if(this.state.profile && this.state.profile.avatar === undefined) this.state.profile.avatar = null;
+
 this.isContinuousListening=false;this.isSpeaking=false;this.recognition=null;this.availableVoices=[];this.currentUtterance=null;
 this.initSpeechRecognition();this.initSpeechSynthesis();
 document.getElementById('voice-persona-select').value=this.state.voicePersona||'mr_female';
@@ -342,27 +401,128 @@ document.getElementById('voice-persona-select').value=this.state.voicePersona;
 document.getElementById('assistant-agent-select').value=this.state.voicePersona;
 this.saveState();this.applyTranslations();this.syncProfileView();
 }
-changeCurrency(c){this.state.currency=c;this.state.symbol=c==='INR'?'₹':c==='USD'?'$':c==='EUR'?'€':'£';this.saveState();this.renderAll()}
-formatMoney(a){return `${this.state.symbol}${Number(a||0).toLocaleString('en-IN',{minimumFractionDigits:2})}`}
+
+saveExchangeRate(){
+    const val = parseFloat(document.getElementById('set-exchange-rate').value);
+    if(isNaN(val) || val <= 0) return alert('Enter valid exchange rate.');
+    this.state.exchangeRate = val;
+    this.saveState();
+    this.showToast(this.state.lang==='mr'?'एक्सचेंज रेट सेव्ह झाला!':'Exchange rate saved!');
+}
+
+changeCurrencyPrompt(newCur) {
+    if(this.state.currency === newCur) return;
+    const msg = this.state.lang === 'mr' 
+        ? `सर्व रकमा (1 USD = ₹${this.state.exchangeRate.toFixed(2)}) दराने रूपांतरित करायच्या का?` 
+        : `Convert all amounts using 1 USD = ₹${this.state.exchangeRate.toFixed(2)}?`;
+    if(confirm(msg)) {
+        this.changeCurrency(newCur);
+    } else {
+        document.getElementById('currency-select').value = this.state.currency;
+    }
+}
+
+changeCurrency(newCur){
+    const rate = this.state.exchangeRate || 84.00;
+    let multiplier = 1;
+    if(this.state.currency === 'INR' && newCur === 'USD') multiplier = 1 / rate;
+    else if(this.state.currency === 'USD' && newCur === 'INR') multiplier = rate;
+
+    this.state.groups.forEach(g => { if(g.budget) g.budget = parseFloat((g.budget * multiplier).toFixed(2)); });
+    this.state.expenses.forEach(e => {
+        e.amount = parseFloat((e.amount * multiplier).toFixed(2));
+        if(e.splits) for(let k in e.splits) e.splits[k] = parseFloat((e.splits[k] * multiplier).toFixed(2));
+        if(e.paidByMultiple) for(let k in e.paidByMultiple) e.paidByMultiple[k] = parseFloat((e.paidByMultiple[k] * multiplier).toFixed(2));
+    });
+    this.state.settlements.forEach(s => { s.amount = parseFloat((s.amount * multiplier).toFixed(2)); });
+
+    this.state.currency = newCur;
+    this.state.symbol = newCur === 'INR' ? '₹' : '$';
+    this.saveState();
+    this.renderAll();
+    this.showToast(this.state.lang === 'mr' ? 'चलन रूपांतरित झाले!' : 'Currency converted!');
+}
+
+formatMoney(a){return `${this.state.symbol}${Number(a||0).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2})}`}
 getUser(id){return this.state.users.find(u=>u.id===id)||{name:'Unknown'}}
 getGroup(id){return this.state.groups.find(g=>g.id===id)||{name:'Group',notes:'',members:[],photos:[]}}
 
+// ===== AVATAR & PROFILE LOGIC =====
+handleAvatarUpload(ev) {
+    const file = ev.target.files[0];
+    if(!file) return;
+    if(!file.type.startsWith('image/')) {
+        alert(this.state.lang==='mr'?'फक्त फोटो फाईल टाका.':'Please upload an image file.');
+        ev.target.value = '';
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => {
+        const img = new Image();
+        img.onload = () => {
+            const c = document.createElement('canvas'), ctx = c.getContext('2d');
+            const s = Math.min(200/img.width, 200/img.height, 1);
+            c.width = img.width * s; c.height = img.height * s;
+            ctx.drawImage(img, 0, 0, c.width, c.height);
+            this.state.profile.avatar = c.toDataURL('image/jpeg', 0.8);
+            this.saveState();
+            this.syncProfileView();
+            ev.target.value = '';
+            this.showToast(this.state.lang==='mr'?'प्रोफाईल फोटो अपडेट झाला!':'Profile photo updated!');
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
+removeAvatar() {
+    this.state.profile.avatar = null;
+    this.saveState();
+    this.syncProfileView();
+    this.showToast(this.state.lang==='mr'?'फोटो काढला!':'Photo removed!');
+}
+
 syncProfileView(){
-const p=this.state.profile||{name:'Admin User',email:'admin@sharespend.app',phone:''};
+const p=this.state.profile||{name:'Admin User',email:'admin@sharespend.app',phone:'',avatar:null};
 const me=this.state.users.find(u=>u.id==='u_you');
-const name=me?me.name:p.name,email=(me&&me.email)?me.email:p.email,phone=(me&&me.phone)?me.phone:p.phone;
+const name=me?me.name:p.name, email=(me&&me.email)?me.email:p.email, phone=(me&&me.phone)?me.phone:p.phone;
+
 document.getElementById('sidebar-name').innerText=name;
 document.getElementById('sidebar-email').innerText=email;
-document.getElementById('sidebar-avatar').innerText=name.slice(0,2).toUpperCase();
-document.getElementById('set-name').value=name;document.getElementById('set-email').value=email;document.getElementById('set-phone').value=phone||'';
+
+let initials = name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+if(!initials) initials = 'ME';
+
+const sidebarAvatar = document.getElementById('sidebar-avatar');
+const setPreview = document.getElementById('settings-avatar-preview');
+
+if(p.avatar) {
+    const imgHtml = `<img src="${p.avatar}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+    if(sidebarAvatar) sidebarAvatar.innerHTML = imgHtml;
+    if(setPreview) setPreview.innerHTML = imgHtml;
+} else {
+    if(sidebarAvatar) { sidebarAvatar.innerHTML = ''; sidebarAvatar.innerText = initials; }
+    if(setPreview) { setPreview.innerHTML = ''; setPreview.innerText = initials; }
+}
+
+document.getElementById('set-name').value=name;
+document.getElementById('set-email').value=email;
+document.getElementById('set-phone').value=phone||'';
+document.getElementById('set-exchange-rate').value=(this.state.exchangeRate||84.00).toFixed(2);
 const dict=TRANSLATIONS[this.state.lang||'mr'];
 document.getElementById('dash-greeting').innerText=`${dict.welcome}, ${name.split(' ')[0]} 👋`;
 }
+
 saveProfile(){
 const name=document.getElementById('set-name').value.trim(),email=document.getElementById('set-email').value.trim(),phone=document.getElementById('set-phone').value.trim();
-if(name){this.state.profile={name,email,phone};const me=this.state.users.find(u=>u.id==='u_you');if(me){me.name=name;me.email=email;me.phone=phone}}
+if(name){
+    this.state.profile.name=name; this.state.profile.email=email; this.state.profile.phone=phone;
+    const me=this.state.users.find(u=>u.id==='u_you');
+    if(me){me.name=name;me.email=email;me.phone=phone}
+}
 this.saveState();this.syncProfileView();this.renderAll();this.showToast(this.state.lang==='mr'?'प्रोफाइल सेव्ह!':'Profile saved!');
 }
+
 applyTranslations(){
 const dict=TRANSLATIONS[this.state.lang||'mr'];
 document.getElementById('lang-select').value=this.state.lang;
@@ -371,27 +531,54 @@ const inp=document.getElementById('ai-text-input');
 if(inp) inp.placeholder = this.state.lang==='mr' ? 'तुमचा प्रश्न टाइप करा...' : 'Type your query...';
 this.renderAll();
 }
+
 navigateTo(v){
 document.querySelectorAll('main>section').forEach(s=>s.classList.add('hidden'));
 document.getElementById('view-'+v).classList.remove('hidden');
 document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
 const n=document.getElementById('nav-'+v);if(n)n.classList.add('active');
 if(v==='quiz'){this.generateDynamicQuiz();this.renderQuiz()}
-if(v==='settings')this.syncProfileView();
+if(v==='settings'){this.syncProfileView();this.populateSettingsCSV();}
 this.renderAll();
 }
 closeModal(id){document.getElementById(id).classList.add('hidden')}
 
 calculateBalances(expenses = this.state.expenses, settlements = this.state.settlements){
-const bal={};this.state.users.forEach(u=>bal[u.id]=0);
-expenses.forEach(e=>{if(bal[e.paidBy]!==undefined)bal[e.paidBy]+=Number(e.amount);Object.entries(e.splits||{}).forEach(([id,s])=>{if(bal[id]!==undefined)bal[id]-=Number(s)})});
-settlements.forEach(s=>{if(bal[s.payerId]!==undefined)bal[s.payerId]+=Number(s.amount);if(bal[s.payeeId]!==undefined)bal[s.payeeId]-=Number(s.amount)});
-return bal;
+    const bal={};this.state.users.forEach(u=>bal[u.id]=0);
+    
+    expenses.forEach(e=>{
+        let poolPaid = 0;
+        
+        if(e.paidBy === 'MULTIPLE' && e.paidByMultiple) {
+            Object.entries(e.paidByMultiple).forEach(([pId, amt]) => {
+                if(pId === 'POOL') poolPaid += Number(amt);
+                else if(bal[pId] !== undefined) bal[pId] += Number(amt);
+            });
+        } else if (e.paidBy === 'POOL') {
+            poolPaid += Number(e.amount);
+        } else if (bal[e.paidBy] !== undefined) {
+            bal[e.paidBy] += Number(e.amount);
+        }
+
+        let totalAmt = Number(e.amount);
+        let personalAmount = totalAmt - poolPaid;
+        let ratio = totalAmt > 0 ? (personalAmount / totalAmt) : 0;
+
+        if(ratio > 0 && e.splits) {
+            Object.entries(e.splits).forEach(([sId, amt]) => {
+                if(bal[sId] !== undefined) bal[sId] -= (Number(amt) * ratio);
+            });
+        }
+    });
+    
+    settlements.forEach(s=>{if(bal[s.payerId]!==undefined)bal[s.payerId]+=Number(s.amount);if(bal[s.payeeId]!==undefined)bal[s.payeeId]-=Number(s.amount)});
+    return bal;
 }
+
 simplifyDebts(bal){
 const debtors=[],creditors=[],txs=[];
 Object.entries(bal).forEach(([id,a])=>{if(a<-0.01)debtors.push({id,amount:-a});else if(a>0.01)creditors.push({id,amount:a})});
-let i=0,j=0;while(i<debtors.length&&j<creditors.length){const d=debtors[i],c=creditors[j],t=Math.min(d.amount,c.amount);if(t>0.01)txs.push({from:d.id,to:c.id,amount:t});d.amount-=t;c.amount-=t;if(d.amount<0.01)i++;if(c.amount<0.01)j++}
+let i=0,j=0;while(i<debtors.length&&j<creditors.length){const d=debtors[i],c=creditors[j],t=Math.min(d.amount,c.amount);if(t>0.01)txs.push({from:d.id,to:c.id,amount:parseFloat(t.toFixed(2))});d.amount-=t;c.amount-=t;if(d.amount<0.01)i++;if(c.amount<0.01)j++}
 return txs;
 }
 
@@ -436,7 +623,7 @@ document.getElementById('dashboard-trips-overview').innerHTML = this.state.group
 
 document.getElementById('groups-list').innerHTML = this.state.groups.map(g => `<div class="card space-y-3"><div class="flex justify-between items-center"><strong>${g.name}</strong><div class="space-x-1"><button class="btn btn-secondary" style="padding:4px 8px;font-size:10px" onclick="app.editGroup('${g.id}')">✏️</button><button class="btn btn-danger" style="padding:4px 8px;font-size:10px" onclick="app.deleteGroup('${g.id}')">🗑️</button></div></div><p style="font-size:11px">Budget: ${this.formatMoney(g.budget)} | Members: ${g.members.length}</p><button class="btn btn-primary w-full" style="padding:6px;font-size:11px" onclick="app.openGroupDetailsModal('${g.id}')">Open ➔</button></div>`).join('');
 
-document.getElementById('all-expenses-list').innerHTML = this.state.expenses.map(e => `<div class="card flex justify-between"><div><strong>${e.description}</strong><p style="font-size:11px">${e.date} • ${this.getGroup(e.groupId).name}</p></div><strong>${this.formatMoney(e.amount)}</strong></div>`).join('');
+document.getElementById('all-expenses-list').innerHTML = this.state.expenses.map(e => `<div class="card flex justify-between"><div><strong>${e.description}</strong><p style="font-size:11px">${e.date} • ${this.getGroup(e.groupId).name} • ${e.paymentMode||'UPI'}</p></div><strong>${this.formatMoney(e.amount)}</strong></div>`).join('');
 
 document.getElementById('members-list').innerHTML = this.state.users.map(u => {
     const uBal = globalBal[u.id] || 0;
@@ -465,7 +652,12 @@ if(aiContextGroup) {
 
 }
 
-// ==================== SMART FRONTEND VOICE ENGINE ====================
+getCurrencyWord(cur, isMr) {
+    if (cur === 'INR') return isMr ? 'रुपये' : 'Rupees';
+    if (cur === 'USD') return isMr ? 'डॉलर्स' : 'Dollars';
+    return isMr ? 'रुपये' : 'Rupees';
+}
+
 initSpeechSynthesis(){
 if('speechSynthesis' in window){
 const set=()=>{this.availableVoices=window.speechSynthesis.getVoices()||[]};
@@ -598,8 +790,7 @@ const el=document.getElementById('ai-text-input');const val=el.value.trim();
 if(val){el.blur();this.processVoiceText(val);el.value=''}
 }
 
-getCurrencyWord(cur,isMr){if(cur==='INR')return isMr?'रुपये':'Rupees';if(cur==='USD')return isMr?'डॉलर्स':'Dollars';if(cur==='EUR')return isMr?'युरो':'Euros';if(cur==='GBP')return isMr?'पाउंड्स':'Pounds';return isMr?'रुपये':'Rupees'}
-
+// BUG 1 FIX: Updated RegExp for navigation phrases (Settings, Profile, Bin, Assistant, Members)
 processVoiceText(txt){
 document.getElementById('assistant-transcript').innerText=`"${txt}"`;
 let response='';
@@ -619,14 +810,23 @@ const intentDashboard = /dashboard|home|डॅशबोर्ड|होम|म�
 const intentQuiz = /quiz|क्विझ|प्रश्न|game/i.test(lower);
 const intentGroups = /groups|trips|ग्रुप्स|ट्रिप्स|सहली|tour/i.test(lower);
 const intentHistory = /expenses|history|इतिहास|खर्च दाखव|नोंदी|kharch dakhv|record/i.test(lower);
-const intentOweMe = /owes me|येणे|कोणाकडे|who owes|maza kade|mala kiti/i.test(lower);
-const intentIOwe = /i owe|देणे|मला द्यायचे|how much i owe|माझी बाकी|maza kiti/i.test(lower);
-const intentFood = /food|जेवण|खाण्या|khanya|jevan/i.test(lower);
+const intentMembers = /members|manage|management|सदस्य|lok|people/i.test(lower);
+const intentBin = /bin|recycle|trash|कचरा|delete|डिलीट/i.test(lower);
+const intentSettings = /settings|profile|सेटिंग्ज|प्रोफाईल|खाते|account/i.test(lower);
+const intentAssistant = /assistant|voice|व्हॉइस|असिस्टंट|ai/i.test(lower);
+
+const intentOweMe = /owes me|येणे|कोणाकडे|who owes|maza kade|mala kiti|माझे कोणाकडे पैसे/i.test(lower);
+const intentIOwe = /i owe|देणे|द्यायचे|how much i owe|माझी बाकी|maza kiti|मला कोणाला द्यायचे/i.test(lower);
+const intentFood = /food|जेवण|खाण्या|khanya|jevan|जेवणावर खर्च/i.test(lower);
 
 if(intentDashboard){this.navigateTo('dashboard');response=isMr?'डॅशबोर्ड उघडत आहे':'Navigating to dashboard'}
 else if(intentQuiz){this.navigateTo('quiz');response=isMr?'क्विझ उघडत आहे':'Opening quiz'}
 else if(intentGroups){this.navigateTo('groups');response=isMr?'ग्रुप्स उघडत आहे':'Opening groups'}
 else if(intentHistory){this.navigateTo('expenses');response=isMr?'खर्चाचा इतिहास उघडत आहे':'Opening expense history'}
+else if(intentMembers){this.navigateTo('members');response=isMr?'सदस्य व्यवस्थापन उघडत आहे':'Opening manage members'}
+else if(intentBin){this.navigateTo('bin');response=isMr?'ट्रॅश बिन उघडत आहे':'Opening recycle bin'}
+else if(intentSettings){this.navigateTo('settings');response=isMr?'सेटिंग्ज उघडत आहे':'Opening settings and profile'}
+else if(intentAssistant){this.navigateTo('assistant');response=isMr?'एआय व्हॉईस असिस्टंट उघडत आहे':'Opening AI voice assistant'}
 
 else if(intentOweMe){
     let oweMeDetails = [];
@@ -639,10 +839,10 @@ else if(intentOweMe){
         
         if (list.length > 0) {
             if (isMr) {
-                const groupStr = list.map(t => `${this.getUser(t.from).name} कडून ${t.amount} ${cur}`).join(' आणि ');
+                const groupStr = list.map(t => `${this.getUser(t.from).name} कडून ${t.amount.toFixed(2)} ${cur}`).join(' आणि ');
                 oweMeDetails.push(`'${g.name}' ट्रिपमध्ये तुमचे ${groupStr} येणे बाकी आहे`);
             } else {
-                const groupStr = list.map(t => `${this.getUser(t.from).name} owes you ${t.amount} ${cur}`).join(' and ');
+                const groupStr = list.map(t => `${this.getUser(t.from).name} owes you ${t.amount.toFixed(2)} ${cur}`).join(' and ');
                 oweMeDetails.push(`In '${g.name}' trip, ${groupStr}`);
             }
         }
@@ -666,10 +866,10 @@ else if(intentIOwe){
         
         if (list.length > 0) {
             if (isMr) {
-                const groupStr = list.map(t => `${this.getUser(t.to).name} ला ${t.amount} ${cur}`).join(' आणि ');
+                const groupStr = list.map(t => `${this.getUser(t.to).name} ला ${t.amount.toFixed(2)} ${cur}`).join(' आणि ');
                 iOweDetails.push(`'${g.name}' ट्रिपमध्ये तुम्हाला ${groupStr} देणे बाकी आहे`);
             } else {
-                const groupStr = list.map(t => `${t.amount} ${cur} to ${this.getUser(t.to).name}`).join(' and ');
+                const groupStr = list.map(t => `${t.amount.toFixed(2)} ${cur} to ${this.getUser(t.to).name}`).join(' and ');
                 iOweDetails.push(`In '${g.name}' trip, you owe ${groupStr}`);
             }
         }
@@ -684,49 +884,237 @@ else if(intentIOwe){
 }
 else if(intentFood){
 const total = this.state.expenses.filter(e => e.category === 'Food' && targetGroupIds.includes(e.groupId)).reduce((s, e) => s + Number(e.amount), 0);
-response=isMr?`जेवणावर आतापर्यंत ${total} ${cur} खर्च झाला आहे`:`Total food expense is ${total} ${cur}`;
+response=isMr?`जेवणावर आतापर्यंत ${total.toFixed(2)} ${cur} खर्च झाला आहे`:`Total food expense is ${total.toFixed(2)} ${cur}`;
 }else{
 const total = this.state.expenses.filter(e => targetGroupIds.includes(e.groupId)).reduce((s, e) => s + Number(e.amount), 0);
-response=isMr?`मी तुमच्या सेवेत आहे. तुमचा एकूण खर्च ${total} ${cur} आहे`:`I am here to help. Your total recorded spend is ${total} ${cur}`;
+response=isMr?`मी तुमच्या सेवेत आहे. तुमचा एकूण खर्च ${total.toFixed(2)} ${cur} आहे`:`I am here to help. Your total recorded spend is ${total.toFixed(2)} ${cur}`;
 }
 
 document.getElementById('assistant-response').innerText=response;
 this.speakAssistantResponse(response, isMr);
 }
 
-// ===== CRUD + TRUE DYNAMIC QUIZ =====
+autoCalculateSplits() {
+    const splitType = document.getElementById('exp-split-type').value;
+    const paidBy = document.getElementById('exp-paidby').value;
+    const amt = Number(document.getElementById('exp-amt').value) || 0;
+    
+    if (paidBy === 'MULTIPLE') {
+        let inputs = document.querySelectorAll('.payer-amount');
+        if(inputs.length > 0) {
+            let val = (amt / inputs.length).toFixed(2);
+            inputs.forEach(inp => inp.value = val);
+        }
+    }
+    if (splitType === 'UNEQUALLY') {
+        let inputs = document.querySelectorAll('.split-amount');
+        if(inputs.length > 0) {
+            let val = (amt / inputs.length).toFixed(2);
+            inputs.forEach(inp => inp.value = val);
+        }
+    }
+}
+
 openExpenseModal(){
-if(!this.state.groups.length)return alert(this.state.lang==='mr'?'आधी ग्रुप तयार करा':'Create a group first');
-document.getElementById('exp-group').innerHTML=this.state.groups.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
-this.updateExpensePaidByOptions();
+if(!this.state.groups.length)return alert(this.state.lang==='mr'?'आधी ट्रिप तयार करा':'Create a trip first');
+const grpSelect = document.getElementById('exp-group');
+grpSelect.innerHTML=this.state.groups.map(g=>`<option value="${g.id}">${g.name}</option>`).join('');
 document.getElementById('exp-date').value=new Date().toISOString().split('T')[0];
+document.getElementById('exp-amt').value='';
+document.getElementById('exp-desc').value='';
+this.updateExpenseUI();
 document.getElementById('modal-expense').classList.remove('hidden')
 }
 
-updateExpensePaidByOptions(){
-const gId = document.getElementById('exp-group').value;
-const group = this.getGroup(gId);
-const memberOptions = group.members.map(mId => {
-const u = this.getUser(mId);
-return `<option value="${u.id}">${u.name}</option>`;
-}).join('');
-document.getElementById('exp-paidby').innerHTML = memberOptions;
+openAdvancedExpenseFromInline() {
+    const gId = document.getElementById('active-detail-group-id').value;
+    this.saveInlineSheetChanges();
+    this.openExpenseModal();
+    document.getElementById('exp-group').value = gId;
+    this.updateExpenseUI();
+}
+
+handleInlinePayerChange(selectEl, expId) {
+    if(selectEl.value === 'MULTIPLE') {
+        const gId = document.getElementById('active-detail-group-id').value;
+        const tr = selectEl.closest('tr');
+        const desc = tr.querySelector('.inline-desc').value;
+        const amt = tr.querySelector('.inline-amt').value;
+        const date = tr.querySelector('.inline-date').value;
+        const cat = tr.querySelector('.inline-cat').value;
+        const mode = tr.querySelector('.inline-paymode').value;
+
+        this.state.expenses = this.state.expenses.filter(e => e.id !== expId);
+        this.saveState();
+        
+        this.closeModal('modal-group-details');
+        this.openExpenseModal();
+        
+        document.getElementById('exp-group').value = gId;
+        this.updateExpenseUI();
+        
+        document.getElementById('exp-desc').value = desc;
+        document.getElementById('exp-amt').value = amt;
+        document.getElementById('exp-date').value = date;
+        document.getElementById('exp-cat').value = cat;
+        document.getElementById('exp-paymode').value = mode;
+        
+        document.getElementById('exp-paidby').value = 'MULTIPLE';
+        this.togglePayerUI();
+        this.autoCalculateSplits();
+        
+        this.showToast(this.state.lang === 'mr' ? 'Advanced मोड उघडला आहे!' : 'Switched to Advanced mode!');
+    } else {
+        const tr = selectEl.closest('tr');
+        tr.querySelector('.inline-amt').removeAttribute('readonly');
+        tr.querySelector('.inline-desc').removeAttribute('readonly');
+        this.updateInlineSheetTotal();
+    }
+}
+
+updateExpenseUI(){
+    const gId = document.getElementById('exp-group').value;
+    const group = this.getGroup(gId);
+    if(!group) return;
+
+    let payerHtml = '';
+    if(group.isPool) payerHtml += `<option value="POOL">💰 Group Pool (Pre-Collected Fund)</option>`;
+    group.members.forEach(mId => payerHtml += `<option value="${mId}">${this.getUser(mId).name}</option>`);
+    payerHtml += `<option value="MULTIPLE">👨‍👩‍👧‍👦 Multiple Payers</option>`;
+    document.getElementById('exp-paidby').innerHTML = payerHtml;
+
+    document.getElementById('exp-split-type').value = 'EQUALLY_ALL';
+    this.togglePayerUI();
+    this.updateSplitUI();
+}
+
+togglePayerUI(){
+    const paidBy = document.getElementById('exp-paidby').value;
+    const container = document.getElementById('exp-multiple-payers-container');
+    if (paidBy === 'MULTIPLE') {
+        const group = this.getGroup(document.getElementById('exp-group').value);
+        const amt = Number(document.getElementById('exp-amt').value) || 0;
+        let membersCount = group.members.length + (group.isPool ? 1 : 0);
+        let defaultAmt = amt > 0 ? (amt / membersCount).toFixed(2) : '';
+
+        let html = '';
+        if(group.isPool) html += `<div class="flex justify-between items-center"><span style="font-size:12px;font-weight:700">💰 Group Pool</span><input type="number" step="0.01" class="payer-amount" data-id="POOL" style="width:100px;padding:4px" placeholder="0" value="${defaultAmt}"></div>`;
+        group.members.forEach(mId => {
+            html += `<div class="flex justify-between items-center"><span style="font-size:12px">${this.getUser(mId).name}</span><input type="number" step="0.01" class="payer-amount" data-id="${mId}" style="width:100px;padding:4px" placeholder="0" value="${defaultAmt}"></div>`;
+        });
+        container.innerHTML = html;
+        container.classList.remove('hidden');
+    } else {
+        container.classList.add('hidden');
+    }
+}
+
+updateSplitUI(){
+    const splitType = document.getElementById('exp-split-type').value;
+    const container = document.getElementById('exp-split-dynamic-container');
+    const group = this.getGroup(document.getElementById('exp-group').value);
+    const amt = Number(document.getElementById('exp-amt').value) || 0;
+
+    if (splitType === 'EQUALLY_ALL') {
+        container.classList.add('hidden');
+    } else if (splitType === 'EQUALLY_SOME') {
+        let html = '<div class="checkbox-group">';
+        group.members.forEach(mId => {
+            html += `<label class="checkbox-label"><input type="checkbox" class="split-checkbox" value="${mId}" checked> ${this.getUser(mId).name}</label>`;
+        });
+        html += '</div>';
+        container.innerHTML = html;
+        container.classList.remove('hidden');
+    } else if (splitType === 'UNEQUALLY') {
+        let html = '';
+        let defaultAmt = amt > 0 ? (amt / group.members.length).toFixed(2) : '';
+        group.members.forEach(mId => {
+            html += `<div class="flex justify-between items-center"><span style="font-size:12px">${this.getUser(mId).name}</span><input type="number" step="0.01" class="split-amount" data-id="${mId}" style="width:100px;padding:4px" placeholder="0" value="${defaultAmt}"></div>`;
+        });
+        container.innerHTML = html;
+        container.classList.remove('hidden');
+    } else if (splitType === 'ON_BEHALF') {
+        let html = `<select id="exp-on-behalf-select" style="padding:6px;width:100%;border-radius:6px;">`;
+        group.members.forEach(mId => {
+            html += `<option value="${mId}">${this.getUser(mId).name} owes full amount</option>`;
+        });
+        html += `</select>`;
+        container.innerHTML = html;
+        container.classList.remove('hidden');
+    }
 }
 
 saveExpense(e){
-e.preventDefault();
-const gId=document.getElementById('exp-group').value,group=this.getGroup(gId),amt=Number(document.getElementById('exp-amt').value);
-const splits={};
-group.members.forEach(m=>splits[m]=amt/group.members.length);
-// ADDED PAYMENT MODE TO GLOBAL EXPENSE SAVE
-this.state.expenses.unshift({id:'e_'+Date.now(),groupId:gId,paidBy:document.getElementById('exp-paidby').value,description:document.getElementById('exp-desc').value,amount:amt,category:document.getElementById('exp-cat').value,paymentMode:document.getElementById('exp-paymode').value||'UPI',date:document.getElementById('exp-date').value,splits});
-this.saveState();this.closeModal('modal-expense');this.renderAll()
+    e.preventDefault();
+    const gId = document.getElementById('exp-group').value;
+    const group = this.getGroup(gId);
+    const amt = parseFloat(Number(document.getElementById('exp-amt').value).toFixed(2));
+    
+    let paidBy = document.getElementById('exp-paidby').value;
+    let paidByMultiple = null;
+
+    if (paidBy === 'MULTIPLE') {
+        paidByMultiple = {};
+        let sum = 0;
+        document.querySelectorAll('.payer-amount').forEach(inp => {
+            let v = parseFloat(Number(inp.value||0).toFixed(2));
+            if(v > 0) paidByMultiple[inp.dataset.id] = v;
+            sum += v;
+        });
+        if(Math.abs(sum - amt) > 0.10) return alert((this.state.lang==='mr'?'Payer रक्कम एकूण रकमेएवढी असायला हवी! एकूण: ':'Payer amounts must equal total. Total: ') + amt + ', Entered: ' + sum.toFixed(2));
+    }
+
+    let splits = {};
+    let splitType = document.getElementById('exp-split-type').value;
+
+    if(splitType === 'EQUALLY_ALL') {
+        let val = parseFloat((amt / group.members.length).toFixed(2));
+        let diff = amt - (val * group.members.length);
+        group.members.forEach((m, idx) => splits[m] = val + (idx === 0 ? diff : 0));
+    } else if (splitType === 'EQUALLY_SOME') {
+        let checked = Array.from(document.querySelectorAll('.split-checkbox:checked')).map(c=>c.value);
+        if(!checked.length) return alert('Select at least one person to split.');
+        let val = parseFloat((amt / checked.length).toFixed(2));
+        let diff = amt - (val * checked.length);
+        checked.forEach((m, idx) => splits[m] = val + (idx === 0 ? diff : 0));
+    } else if (splitType === 'UNEQUALLY') {
+        let sum = 0;
+        let inputs = document.querySelectorAll('.split-amount');
+        inputs.forEach(inp => {
+            let v = parseFloat(Number(inp.value||0).toFixed(2));
+            if(v > 0) splits[inp.dataset.id] = v;
+            sum += v;
+        });
+        if(Math.abs(sum - amt) > 0.10) return alert((this.state.lang==='mr'?'Split रक्कम एकूण रकमेएवढी असायला हवी! एकूण: ':'Split amounts must equal total. Total: ') + amt + ', Entered: ' + sum.toFixed(2));
+    } else if (splitType === 'ON_BEHALF') {
+        let debtor = document.getElementById('exp-on-behalf-select').value;
+        splits[debtor] = amt;
+    }
+
+    this.state.expenses.unshift({
+        id: 'e_' + Date.now(),
+        groupId: gId,
+        paidBy: paidBy,
+        paidByMultiple: paidByMultiple,
+        description: document.getElementById('exp-desc').value,
+        amount: amt,
+        category: document.getElementById('exp-cat').value,
+        paymentMode: document.getElementById('exp-paymode').value || 'UPI',
+        date: document.getElementById('exp-date').value,
+        splitType: splitType,
+        splits: splits
+    });
+    
+    this.saveState();
+    this.closeModal('modal-expense');
+    this.renderAll();
 }
 
 openGroupModal(){
 document.getElementById('grp-edit-id').value='';
 document.getElementById('grp-name').value='';
 document.getElementById('grp-budget').value='';
+document.getElementById('grp-is-pool').checked = false;
 document.getElementById('select-all-members').checked = true;
 document.getElementById('grp-members-checkboxes').innerHTML=this.state.users.map(u=>`<label class="checkbox-label"><input type="checkbox" value="${u.id}" checked> ${u.name}</label>`).join('');
 document.getElementById('modal-group-header-title').innerText=this.state.lang==='mr'?'नवीन ग्रुप':'Create Group';
@@ -739,6 +1127,7 @@ document.getElementById('grp-edit-id').value=g.id;
 document.getElementById('grp-name').value=g.name;
 document.getElementById('grp-type').value=g.type||'Trip';
 document.getElementById('grp-budget').value=g.budget||'';
+document.getElementById('grp-is-pool').checked = !!g.isPool;
 const allChecked = g.members.length === this.state.users.length && this.state.users.length > 0;
 document.getElementById('select-all-members').checked = allChecked;
 document.getElementById('grp-members-checkboxes').innerHTML=this.state.users.map(u=>`<label class="checkbox-label"><input type="checkbox" value="${u.id}" ${g.members.includes(u.id)?'checked':''}> ${u.name}</label>`).join('');
@@ -755,14 +1144,31 @@ saveGroup(e){
 e.preventDefault();
 const id=document.getElementById('grp-edit-id').value,checked=Array.from(document.querySelectorAll('#grp-members-checkboxes input:checked')).map(c=>c.value);
 if(!checked.length)return alert('Select members');
+
 if(id){
-const g=this.getGroup(id);
-g.name=document.getElementById('grp-name').value;
-g.type=document.getElementById('grp-type').value;
-g.budget=Number(document.getElementById('grp-budget').value);
-g.members=checked;
+    const g=this.getGroup(id);
+    const oldLength = g.members.length;
+    
+    g.name=document.getElementById('grp-name').value;
+    g.type=document.getElementById('grp-type').value;
+    g.budget=parseFloat(Number(document.getElementById('grp-budget').value).toFixed(2))||0;
+    g.isPool=document.getElementById('grp-is-pool').checked;
+    g.members=checked;
+
+    if(oldLength !== checked.length) {
+        this.state.expenses.forEach(ex => {
+            if(ex.groupId === id && (ex.splitType === 'EQUALLY_ALL' || !ex.splitType)) {
+                const splits = {};
+                let val = parseFloat((ex.amount / checked.length).toFixed(2));
+                let diff = ex.amount - (val * checked.length);
+                checked.forEach((m, idx) => splits[m] = val + (idx === 0 ? diff : 0));
+                ex.splits = splits;
+                ex.splitType = 'EQUALLY_ALL';
+            }
+        });
+    }
 }else{
-this.state.groups.push({id:'g_'+Date.now(),name:document.getElementById('grp-name').value,type:document.getElementById('grp-type').value,budget:Number(document.getElementById('grp-budget').value),members:checked,notes:'',photos:[]})
+    this.state.groups.push({id:'g_'+Date.now(),name:document.getElementById('grp-name').value,type:document.getElementById('grp-type').value,budget:parseFloat(Number(document.getElementById('grp-budget').value).toFixed(2))||0,isPool:document.getElementById('grp-is-pool').checked,members:checked,notes:'',photos:[]})
 }
 this.saveState();this.closeModal('modal-group');this.renderAll()
 }
@@ -796,27 +1202,89 @@ document.getElementById('settle-payee').innerHTML = memberOptions;
 
 recordSettlement(e){
 e.preventDefault();
-this.state.settlements.unshift({id:'s_'+Date.now(),groupId:document.getElementById('settle-group').value,payerId:document.getElementById('settle-payer').value,payeeId:document.getElementById('settle-payee').value,amount:Number(document.getElementById('settle-amt').value),date:new Date().toISOString().split('T')[0]});
+this.state.settlements.unshift({id:'s_'+Date.now(),groupId:document.getElementById('settle-group').value,payerId:document.getElementById('settle-payer').value,payeeId:document.getElementById('settle-payee').value,amount:parseFloat(Number(document.getElementById('settle-amt').value).toFixed(2)),date:new Date().toISOString().split('T')[0]});
 this.saveState();this.closeModal('modal-settle');this.renderAll()
 }
 
 openGroupDetailsModal(gId){const g=this.getGroup(gId);document.getElementById('active-detail-group-id').value=g.id;document.getElementById('grp-detail-modal-title').innerText=g.name;document.getElementById('trip-notes-area').value=g.notes||'';this.renderInlineSheetRows(gId);this.renderTripPhotos(gId);document.getElementById('modal-group-details').classList.remove('hidden')}
-renderInlineSheetRows(gId){const g=this.getGroup(gId),exps=this.state.expenses.filter(e=>e.groupId===gId);let total=0;
-document.getElementById('inline-sheet-tbody').innerHTML=exps.map(e=>{
-    total+=Number(e.amount);
-    // UPDATED TABLE ROW WITH PAYMENT MODE
-    return `<tr data-eid="${e.id}"><td><input type="date" class="inline-date" value="${e.date}" style="padding:4px;font-size:11px"></td><td><input type="text" class="inline-desc" value="${e.description}" style="padding:4px"></td><td><select class="inline-cat" style="padding:4px"><option value="Food" ${e.category==='Food'?'selected':''}>Food</option><option value="Transport" ${e.category==='Transport'?'selected':''}>Transport</option><option value="Lodging" ${e.category==='Lodging'?'selected':''}>Lodging</option><option value="Others" ${e.category==='Others'?'selected':''}>Others</option></select></td><td><select class="inline-paymode" style="padding:4px"><option value="UPI" ${e.paymentMode==='UPI'?'selected':''}>UPI</option><option value="Cash" ${e.paymentMode==='Cash'?'selected':''}>Cash</option><option value="Card" ${e.paymentMode==='Card'?'selected':''}>Card</option><option value="Bank" ${e.paymentMode==='Bank'?'selected':''}>Bank</option></select></td><td><input type="number" class="inline-amt" value="${e.amount}" oninput="app.updateInlineSheetTotal()" style="padding:4px;width:70px"></td><td><select class="inline-payer" style="padding:4px">${g.members.map(mId=>{const u=this.getUser(mId);return `<option value="${u.id}" ${e.paidBy===u.id?'selected':''}>${u.name}</option>`}).join('')}</select></td><td><button class="btn btn-danger" style="padding:4px 8px" onclick="app.deleteInlineExpenseRow('${e.id}')">🗑️</button></td></tr>`
-}).join('');
-this.updateBudgetBars(g.budget,total)}
+
+renderInlineSheetRows(gId){
+    const g=this.getGroup(gId),exps=this.state.expenses.filter(e=>e.groupId===gId);let total=0;
+    document.getElementById('inline-sheet-tbody').innerHTML=exps.map(e=>{
+        total+=Number(e.amount);
+        
+        let payerOptions = g.isPool ? `<option value="POOL" ${e.paidBy==='POOL'?'selected':''}>Pool</option>` : '';
+        g.members.forEach(mId=>{
+            const u=this.getUser(mId);
+            payerOptions += `<option value="${u.id}" ${e.paidBy===u.id?'selected':''}>${u.name}</option>`;
+        });
+        
+        payerOptions += `<option value="MULTIPLE" ${e.paidBy==='MULTIPLE'?'selected':''}>Multi...</option>`;
+
+        return `<tr data-eid="${e.id}">
+            <td><input type="date" class="inline-date" value="${e.date}" style="padding:4px;font-size:11px"></td>
+            <td><input type="text" class="inline-desc" value="${e.description}" style="padding:4px" ${e.paidBy==='MULTIPLE'?'readonly title="Multiple Payers"':''}></td>
+            <td><select class="inline-cat" style="padding:4px"><option value="Food" ${e.category==='Food'?'selected':''}>Food</option><option value="Transport" ${e.category==='Transport'?'selected':''}>Transport</option><option value="Lodging" ${e.category==='Lodging'?'selected':''}>Lodging</option><option value="Others" ${e.category==='Others'?'selected':''}>Others</option></select></td>
+            <td><select class="inline-paymode" style="padding:4px"><option value="UPI" ${e.paymentMode==='UPI'?'selected':''}>UPI</option><option value="Cash" ${e.paymentMode==='Cash'?'selected':''}>Cash</option><option value="Card" ${e.paymentMode==='Card'?'selected':''}>Card</option><option value="Bank" ${e.paymentMode==='Bank'?'selected':''}>Bank</option></select></td>
+            <td><input type="number" step="0.01" class="inline-amt" value="${e.amount.toFixed(2)}" oninput="app.updateInlineSheetTotal()" style="padding:4px;width:70px" ${e.paidBy==='MULTIPLE'?'readonly title="Edit from Main Modal"':''}></td>
+            <td><select class="inline-payer" style="padding:4px" onchange="app.handleInlinePayerChange(this, '${e.id}')">${payerOptions}</select></td>
+            <td><button class="btn btn-danger" style="padding:4px 8px" onclick="app.deleteInlineExpenseRow('${e.id}')">🗑️</button></td>
+        </tr>`
+    }).join('');
+    this.updateBudgetBars(g.budget,total)
+}
 
 updateInlineSheetTotal(){const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId);let total=0;document.querySelectorAll('.inline-amt').forEach(i=>total+=Number(i.value||0));this.updateBudgetBars(g.budget,total)}
 updateBudgetBars(b,t){document.getElementById('inline-sheet-budget').innerText=this.formatMoney(b);document.getElementById('inline-sheet-total').innerText=this.formatMoney(t);const r=document.getElementById('inline-sheet-remaining');r.innerText=this.formatMoney(b-t);r.style.color=(b-t)<0?'var(--danger)':'var(--primary)'}
-addInlineExpenseRow(){this.syncInlineSheetInputs();const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId);
-// ADDED PAYMENT MODE TO DEFAULT ROW
-this.state.expenses.unshift({id:'e_'+Date.now(),groupId:gId,description:'',amount:0,category:'Others',paymentMode:'UPI',date:new Date().toISOString().split('T')[0],paidBy:g.members[0]||'u_you',splits:{}});
-this.renderInlineSheetRows(gId)}
+
+addInlineExpenseRow(){
+    this.syncInlineSheetInputs();
+    const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId);
+    let defaultPayer = g.isPool ? 'POOL' : (g.members[0] || 'u_you');
+    let defaultSplits = {};
+    if(defaultPayer !== 'POOL') {
+        g.members.forEach(m=>defaultSplits[m]=0);
+    }
+    this.state.expenses.unshift({id:'e_'+Date.now(),groupId:gId,description:'',amount:0,category:'Others',paymentMode:'UPI',date:new Date().toISOString().split('T')[0],paidBy:defaultPayer,splitType:'EQUALLY_ALL',splits:defaultSplits});
+    this.renderInlineSheetRows(gId)
+}
+
 deleteInlineExpenseRow(eId){this.syncInlineSheetInputs();const gId=document.getElementById('active-detail-group-id').value;this.state.expenses=this.state.expenses.filter(e=>e.id!==eId);this.renderInlineSheetRows(gId)}
-syncInlineSheetInputs(){const gId=document.getElementById('active-detail-group-id').value,group=this.getGroup(gId);document.querySelectorAll('#inline-sheet-tbody tr').forEach(tr=>{const exp=this.state.expenses.find(e=>e.id===tr.dataset.eid);if(exp){exp.date=tr.querySelector('.inline-date').value;exp.description=tr.querySelector('.inline-desc').value;exp.category=tr.querySelector('.inline-cat').value;exp.paymentMode=tr.querySelector('.inline-paymode')?tr.querySelector('.inline-paymode').value:'UPI';exp.amount=Number(tr.querySelector('.inline-amt').value)||0;exp.paidBy=tr.querySelector('.inline-payer').value;const splits={};group.members.forEach(m=>splits[m]=exp.amount/group.members.length);exp.splits=splits}})}
+
+syncInlineSheetInputs(){
+    const gId=document.getElementById('active-detail-group-id').value,group=this.getGroup(gId);
+    document.querySelectorAll('#inline-sheet-tbody tr').forEach(tr=>{
+        const exp=this.state.expenses.find(e=>e.id===tr.dataset.eid);
+        if(exp){
+            exp.date=tr.querySelector('.inline-date').value;
+            exp.description=tr.querySelector('.inline-desc').value;
+            exp.category=tr.querySelector('.inline-cat').value;
+            exp.paymentMode=tr.querySelector('.inline-paymode')?tr.querySelector('.inline-paymode').value:'UPI';
+            
+            let newAmt = parseFloat(Number(tr.querySelector('.inline-amt').value)||0);
+            let payerSelect = tr.querySelector('.inline-payer');
+            
+            if(payerSelect && !payerSelect.disabled && payerSelect.value !== 'MULTIPLE') {
+                exp.paidBy = payerSelect.value;
+                if(exp.paidByMultiple) exp.paidByMultiple = null; 
+                
+                let isEquallyAll = exp.splitType === 'EQUALLY_ALL' || !exp.splitType;
+                if(exp.amount !== newAmt || !exp.splits || Object.keys(exp.splits).length !== group.members.length) {
+                    exp.amount = newAmt;
+                    if(isEquallyAll) {
+                        const splits={};
+                        let val = parseFloat((exp.amount/group.members.length).toFixed(2));
+                        let diff = exp.amount - (val * group.members.length);
+                        group.members.forEach((m, idx) => splits[m] = val + (idx === 0 ? diff : 0));
+                        exp.splits=splits;
+                        exp.splitType = 'EQUALLY_ALL';
+                    }
+                }
+            }
+        }
+    })
+}
+
 saveInlineSheetChanges(){this.syncInlineSheetInputs();const gId=document.getElementById('active-detail-group-id').value;this.getGroup(gId).notes=document.getElementById('trip-notes-area').value;this.saveState();this.closeModal('modal-group-details');this.renderAll();this.showToast(this.state.lang==='mr'?'सेव्ह झाले!':'Saved!')}
 
 handleTripPhotoUpload(ev){
@@ -881,20 +1349,61 @@ deleteTripPhoto(gId,pId){
     }
 }
 
-exportSpecificGroupCSV(){
-    const gId=document.getElementById('active-detail-group-id').value,g=this.getGroup(gId),exps=this.state.expenses.filter(e=>e.groupId===gId);
-    if(!exps.length)return alert('No expenses');
-    let csv=`Group,${g.name}\nBudget,${g.budget}\nNotes,"${g.notes||''}"\n\nDate,Description,Category,Payment Mode,Paid By,Amount\n`;
-    exps.forEach(e=>csv+=`${e.date},"${e.description}",${e.category},${e.paymentMode||'UPI'},${this.getUser(e.paidBy).name},${e.amount}\n`);
-    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download=g.name.replace(/\s+/g,'_')+'_Ledger.csv';a.click()
+populateSettingsCSV() {
+    const select = document.getElementById('export-trip-select');
+    if(!select) return;
+    let html = `<option value="ALL">${this.state.lang==='mr'?'सर्व ट्रिप्स (All Trips)':'All Trips'}</option>`;
+    this.state.groups.forEach(g => html += `<option value="${g.id}">${g.name}</option>`);
+    select.innerHTML = html;
 }
 
-// NEW TRUE DYNAMIC QUIZ GENERATOR
+exportSpecificGroupCSV(){
+    const gId = document.getElementById('active-detail-group-id').value;
+    const g = this.getGroup(gId);
+    const exps = this.state.expenses.filter(e => e.groupId === gId);
+    if(!exps.length) return alert(this.state.lang==='mr'?'येथे कोणताही खर्च नाही.':'No expenses found.');
+
+    let csv = `Group,${g.name}\nBudget,${g.budget}\nNotes,"${g.notes||''}"\n\nDate,Description,Category,Payment Mode,Paid By,Amount\n`;
+    exps.forEach(e => {
+        let payerName = '';
+        if(e.paidBy === 'MULTIPLE') payerName = 'Multiple Payers';
+        else if(e.paidBy === 'POOL') payerName = 'Group Pool';
+        else payerName = this.getUser(e.paidBy).name;
+        
+        csv += `${e.date},"${e.description}",${e.category},${e.paymentMode||'UPI'},${payerName},${e.amount.toFixed(2)}\n`;
+    });
+    
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
+    a.download = g.name.replace(/\s+/g,'_') + '_Ledger.csv';
+    a.click();
+}
+
+exportSelectedCSV() {
+    const tripId = document.getElementById('export-trip-select').value;
+    const exps = tripId === 'ALL' ? this.state.expenses : this.state.expenses.filter(e => e.groupId === tripId);
+    if(!exps.length) return alert(this.state.lang==='mr'?'येथे कोणताही खर्च नाही.':'No expenses found.');
+
+    let csv = 'Date,Group Name,Description,Category,Payment Mode,Paid By,Amount\n';
+    exps.forEach(e => {
+        const gName = this.getGroup(e.groupId).name;
+        let payerName = '';
+        if(e.paidBy === 'MULTIPLE') payerName = 'Multiple Payers';
+        else if(e.paidBy === 'POOL') payerName = 'Group Pool';
+        else payerName = this.getUser(e.paidBy).name;
+        
+        csv += `${e.date},"${gName}","${e.description}",${e.category},${e.paymentMode||'UPI'},${payerName},${e.amount.toFixed(2)}\n`;
+    });
+    
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+    a.download=(tripId==='ALL'?'Master':this.getGroup(tripId).name.replace(/\s+/g,'_'))+'_Ledger.csv';
+    a.click();
+}
+
 generateDynamicQuiz(){
     this.dynamicQuestions=[];
     const isMr=this.state.lang==='mr', cur=this.getCurrencyWord(this.state.currency,isMr);
     
-    // Static question
     this.dynamicQuestions.push({
         q: isMr ? "Simplified Debt चा मुख्य फायदा काय?" : "Primary benefit of simplified debt?",
         options: [isMr?"खर्च कमी":"Reduces spend", isMr?"व्यवहार कमी":"Fewer transactions", isMr?"फक्त एडमिन":"Only admin"],
@@ -903,15 +1412,11 @@ generateDynamicQuiz(){
 
     if(this.state.groups.length > 0){
         const g = this.state.groups[Math.floor(Math.random()*this.state.groups.length)];
-        
-        // Dynamic Question: Budget
         this.dynamicQuestions.push({
             q: isMr ? `'${g.name}' चे एकूण बजेट किती आहे?` : `What is the total budget of '${g.name}'?`,
-            options: [`${g.budget} ${cur}`, `${g.budget+2000} ${cur}`, `${Math.max(0, g.budget-1500)} ${cur}`],
+            options: [`${g.budget.toFixed(2)} ${cur}`, `${(g.budget+2000).toFixed(2)} ${cur}`, `${Math.max(0, g.budget-1500).toFixed(2)} ${cur}`],
             ans: 0
         });
-
-        // Dynamic Question: Member Count
         this.dynamicQuestions.push({
             q: isMr ? `'${g.name}' मध्ये किती सदस्य आहेत?` : `How many members are in '${g.name}'?`,
             options: [`${g.members.length}`, `${g.members.length + 2}`, `${g.members.length + 5}`],
@@ -921,17 +1426,15 @@ generateDynamicQuiz(){
 
     if(this.state.expenses.length > 0){
         const total = this.state.expenses.reduce((s,e)=>s+Number(e.amount),0);
-        // Dynamic Question: Total Spend
         this.dynamicQuestions.push({
             q: isMr ? "आतापर्यंत सर्व ट्रिप्समध्ये मिळून एकूण किती खर्च झाला आहे?" : "What is the total overall spending so far?",
-            options: [`${total} ${cur}`, `${total+1200} ${cur}`, `${Math.max(0, total-500)} ${cur}`],
+            options: [`${total.toFixed(2)} ${cur}`, `${(total+1200).toFixed(2)} ${cur}`, `${Math.max(0, total-500).toFixed(2)} ${cur}`],
             ans: 0
         });
 
-        // Dynamic Question: Who paid for specific expense
         const randomExp = this.state.expenses[Math.floor(Math.random() * this.state.expenses.length)];
         if(randomExp.description) {
-            const payerName = this.getUser(randomExp.paidBy).name;
+            let payerName = randomExp.paidBy === 'MULTIPLE' ? (isMr?'अनेक जण':'Multiple') : (randomExp.paidBy === 'POOL' ? 'Group Pool' : this.getUser(randomExp.paidBy).name);
             const otherUser = this.state.users.find(u => u.id !== randomExp.paidBy)?.name || "Admin";
             this.dynamicQuestions.push({
                 q: isMr ? `'${randomExp.description}' साठी कोणी पैसे दिले?` : `Who paid for '${randomExp.description}'?`,
@@ -941,7 +1444,6 @@ generateDynamicQuiz(){
         }
     }
 
-    // Shuffle options so correct answer is not always first
     this.dynamicQuestions.forEach(q => {
         const correctOpt = q.options[q.ans];
         for (let i = q.options.length - 1; i > 0; i--) {
@@ -954,7 +1456,6 @@ generateDynamicQuiz(){
 
 renderQuiz(){if(!this.dynamicQuestions||!this.dynamicQuestions.length)this.generateDynamicQuiz();const q=this.dynamicQuestions[this.state.quizIndex||0];document.getElementById('quiz-score-badge').innerText=`Score: ${this.state.quizScore||0} / ${this.dynamicQuestions.length}`;const box=document.getElementById('quiz-card-container');if(!q){box.innerHTML=`<div class="text-center space-y-4"><h3>🎉 Completed!</h3><button class="btn btn-primary" onclick="app.state.quizIndex=0;app.state.quizScore=0;app.generateDynamicQuiz();app.renderQuiz()">Restart</button></div>`;return}box.innerHTML=`<div class="space-y-4"><span style="font-size:11px;font-weight:700;color:var(--primary)">Q ${(this.state.quizIndex||0)+1} / ${this.dynamicQuestions.length}</span><h3 style="font-size:16px;font-weight:700">${q.q}</h3><div class="space-y-2">${q.options.map((o,i)=>`<button class="btn btn-secondary w-full text-left" style="padding:12px;justify-content:flex-start" onclick="app.handleQuizAnswer(${i},${q.ans})">${o}</button>`).join('')}</div></div>`}
 handleQuizAnswer(idx,correct){if(idx===correct){this.state.quizScore=(this.state.quizScore||0)+1;alert(this.state.lang==='mr'?'✨ बरोबर!':'✨ Correct!')}else alert(this.state.lang==='mr'?'❌ चुकीचे':'❌ Incorrect');this.state.quizIndex=(this.state.quizIndex||0)+1;this.renderQuiz()}
-exportCSV(){const csv='Date,Description,Category,Payment Mode,Amount\n'+this.state.expenses.map(e=>`${e.date},"${e.description}",${e.category},${e.paymentMode||'UPI'},${e.amount}`).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='Master_Ledger.csv';a.click()}
 resetAllData(){if(confirm('Clear all data permanently?')){localStorage.removeItem(STORAGE_KEY);location.reload()}}
 showToast(msg){const t=document.createElement('div');t.className='toast';t.innerText=msg;document.body.appendChild(t);setTimeout(()=>t.remove(),2500)}
 }
